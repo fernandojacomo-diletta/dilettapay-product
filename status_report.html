@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Executivo · Dileta Pay</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --red: #E30613;
+    --red-dim: rgba(227,6,19,0.15);
+    --red-glow: rgba(227,6,19,0.35);
+    --black: #0B0B0B;
+    --surface: #111111;
+    --surface2: #191919;
+    --surface3: #222222;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --white: #FFFFFF;
+    --grey1: #AAAAAA;
+    --grey2: #666666;
+    --grey3: #333333;
+    --green: #22C55E;
+    --green-dim: rgba(34,197,94,0.15);
+    --yellow: #EAB308;
+    --yellow-dim: rgba(234,179,8,0.15);
+    --risk-red: #FF3B30;
+    --risk-dim: rgba(255,59,48,0.12);
+    --font-display: 'Calibri', 'Calibri Light', 'Gill Sans', 'Trebuchet MS', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--grey3); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--grey2); }
+
+  /* ─── LAYOUT ─── */
+  .shell {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ─── HEADER ─── */
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+  }
+
+  .masthead-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .masthead-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 4px;
+    background: var(--red);
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .masthead-meta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .meta-pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--grey1);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .meta-pill.live::before {
+    content: '●';
+    color: var(--green);
+    margin-right: 6px;
+    animation: blink 1.5s ease infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ─── FILTERS ─── */
+  .filter-bar {
+    padding: 20px 0 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--grey1);
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    border-color: var(--red);
+    color: var(--white);
+    background: var(--red-dim);
+  }
+
+  /* ─── PAGE HERO ─── */
+  .page-hero {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 56px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+
+  .page-title span { color: var(--red); }
+
+  .page-subtitle {
+    color: var(--grey1);
+    font-size: 15px;
+    max-width: 560px;
+  }
+
+  /* ─── GRID SYSTEM ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* ─── SECTION ─── */
+  .section {
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--grey2);
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover { border-color: var(--border-bright); transform: translateY(-1px); }
+  .card:hover::before { opacity: 1; }
+
+  .card-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--grey2);
+    margin-bottom: 8px;
+  }
+
+  .card-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--grey1);
+  }
+
+  /* ─── STATUS BADGE ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border: 1px solid;
+  }
+
+  .badge::before { content: '●'; font-size: 7px; }
+
+  .badge-green { color: var(--green); border-color: rgba(34,197,94,0.3); background: var(--green-dim); }
+  .badge-yellow { color: var(--yellow); border-color: rgba(234,179,8,0.3); background: var(--yellow-dim); }
+  .badge-red { color: var(--risk-red); border-color: rgba(255,59,48,0.3); background: var(--risk-dim); }
+  .badge-grey { color: var(--grey1); border-color: var(--border); background: var(--surface2); }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap { margin: 12px 0; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--grey1);
+    margin-bottom: 6px;
+  }
+  .progress-label span:last-child { font-family: var(--font-mono); }
+  .progress-track {
+    height: 3px;
+    background: var(--surface3);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--red);
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.yellow { background: var(--yellow); }
+
+  /* ─── COLLAPSIBLE ─── */
+  .collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .collapsible-header:hover { background: var(--surface2); }
+
+  .collapsible-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .collapsible-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .collapsible-arrow {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--grey2);
+    transition: transform 0.3s;
+    font-size: 10px;
+  }
+
+  .collapsible-header.open .collapsible-arrow { transform: rotate(180deg); }
+
+  .collapsible-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--border);
+    border-top: none;
+  }
+
+  .collapsible-body.open { max-height: 2000px; }
+
+  .collapsible-content { padding: 24px; background: var(--surface); }
+
+  /* ─── HORIZONS TIMELINE ─── */
+  .timeline-track {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .timeline-track::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: var(--border-bright);
+    z-index: 0;
+  }
+
+  .horizon-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .horizon-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    border: 2px solid;
+    background: var(--black);
+    transition: transform 0.2s;
+  }
+
+  .horizon-dot.done { border-color: var(--green); color: var(--green); }
+  .horizon-dot.current { border-color: var(--red); color: var(--red); box-shadow: 0 0 16px var(--red-glow); animation: pulse 2s ease infinite; }
+  .horizon-dot.planned { border-color: var(--grey3); color: var(--grey2); }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 8px var(--red-glow); }
+    50% { box-shadow: 0 0 24px var(--red-glow); }
+  }
+
+  .horizon-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .horizon-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--grey2);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ─── EMERGENCY BLOCK ─── */
+  .emergency-block {
+    background: var(--surface);
+    border: 1px solid rgba(227,6,19,0.4);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .emergency-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--red);
+  }
+
+  .emergency-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .emergency-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    background: var(--red-dim);
+    border: 1px solid rgba(227,6,19,0.3);
+    padding: 3px 8px;
+  }
+
+  .emergency-body { padding: 24px 24px 24px 28px; }
+
+  /* ─── ITEM ROW ─── */
+  .item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .item-row:last-child { border-bottom: none; }
+
+  .item-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--grey3);
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  .item-dot.red { background: var(--red); }
+  .item-dot.green { background: var(--green); }
+  .item-dot.yellow { background: var(--yellow); }
+
+  .item-text { flex: 1; font-size: 13px; color: var(--grey1); }
+  .item-text strong { color: var(--white); font-weight: 500; }
+
+  /* ─── RISK CARD ─── */
+  .risk-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,59,48,0.2);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .risk-card::after {
+    content: attr(data-risk);
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 48px;
+    color: var(--risk-red);
+    opacity: 0.06;
+    line-height: 1;
+  }
+
+  .risk-number {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--risk-red);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .risk-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .risk-mitigation {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--surface2);
+    padding: 10px 12px;
+    margin-top: 12px;
+    border-left: 2px solid var(--yellow);
+  }
+
+  .risk-mitigation-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--yellow);
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .risk-mitigation-text { font-size: 12px; color: var(--grey1); }
+
+  /* ─── BACKLOG GRID ─── */
+  .backlog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .backlog-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .backlog-item:hover {
+    border-color: var(--border-bright);
+    background: var(--surface3);
+    transform: scale(1.02);
+  }
+
+  .backlog-item-cat {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .backlog-item-cat.regulatorio { color: var(--yellow); }
+  .backlog-item-cat.feature { color: #60A5FA; }
+  .backlog-item-cat.refactoring { color: #A78BFA; }
+
+  .backlog-item-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  /* ─── TEAM GRID ─── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .team-unit {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .team-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--surface3);
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 18px;
+  }
+
+  .team-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .team-desc { font-size: 11px; color: var(--grey2); }
+
+  /* ─── IA BLOCK ─── */
+  .ia-block {
+    background: linear-gradient(135deg, #0B0B0B 0%, #111111 50%, rgba(227,6,19,0.05) 100%);
+    border: 1px solid rgba(227,6,19,0.3);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ia-block::before {
+    content: 'LIA';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 120px;
+    color: var(--red);
+    opacity: 0.04;
+    letter-spacing: -8px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .ia-mvp-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .ia-mvp-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .ia-mvp-icon { font-size: 22px; margin-bottom: 8px; }
+  .ia-mvp-label { font-size: 12px; color: var(--grey1); }
+
+  /* ─── OPERATION STATUS ─── */
+  .op-status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .op-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .op-block-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--grey2);
+    margin-bottom: 12px;
+  }
+
+  /* ─── PERSON CHIP ─── */
+  .person-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    margin: 4px;
+    font-size: 12px;
+  }
+
+  .person-avatar {
+    width: 22px;
+    height: 22px;
+    background: var(--red-dim);
+    border: 1px solid rgba(227,6,19,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  /* ─── TOOLTIP ─── */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface3);
+    border: 1px solid var(--border-bright);
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* ─── STAT STRIP ─── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .stat-item {
+    padding: 20px 24px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .stat-item:last-child { border-right: none; }
+  .stat-item:hover { background: var(--surface2); }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 36px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-num.red { color: var(--red); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.yellow { color: var(--yellow); }
+
+  .stat-key {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--grey2);
+  }
+
+  /* ─── CORE FLOW ─── */
+  .core-flow-people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  /* ─── HIGHLIGHT QUOTE ─── */
+  .highlight-quote {
+    border-left: 3px solid var(--red);
+    padding: 12px 20px;
+    background: var(--red-dim);
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--grey1);
+    font-style: italic;
+  }
+
+  /* ─── HORIZON DETAIL ─── */
+  .horizon-items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .horizon-item-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ─── CHART CONTAINER ─── */
+  .chart-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+  }
+
+  /* ─── ADEN BLOCK ─── */
+  .aden-block {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(96,165,250,0.03) 100%);
+    border: 1px solid rgba(96,165,250,0.2);
+    padding: 24px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .shell { padding: 0 16px 60px; }
+    .grid-2, .grid-3, .grid-4, .grid-2.resp, .backlog-grid, .team-grid, .ia-mvp-grid, .stat-strip { grid-template-columns: 1fr 1fr; }
+    .timeline-track { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .timeline-track::before { display: none; }
+    .op-status { grid-template-columns: 1fr; }
+    .horizon-items { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .grid-2, .grid-3, .grid-4, .backlog-grid, .team-grid, .ia-mvp-grid, .stat-strip { grid-template-columns: 1fr; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat-item:last-child { border-bottom: none; }
+    .timeline-track { grid-template-columns: 1fr; }
+  }
+
+  /* Stagger animation delays */
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.2s; }
+  .section:nth-child(5) { animation-delay: 0.25s; }
+  .section:nth-child(6) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-logo">
+      <div class="logo-mark" style="background:var(--red); width:32px; height:4px;"></div>
+      <div class="logo-text">Dileta Pay</div>
+    </div>
+    <div class="masthead-meta">
+      <div class="filter-bar" style="padding:0; margin:0;">
+        <button class="filter-btn active" onclick="filterAll(this)">Todos</button>
+        <button class="filter-btn" onclick="filterSection(this,'horizonte')">Horizontes</button>
+        <button class="filter-btn" onclick="filterSection(this,'risco')">Riscos</button>
+        <button class="filter-btn" onclick="filterSection(this,'operacao')">Operação</button>
+        <button class="filter-btn" onclick="filterSection(this,'ia')">IA</button>
+      </div>
+      <div class="meta-pill live">Maio 2025</div>
+      <div class="meta-pill">Board Review</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ══════════ HERO ══════════ -->
+  <div class="page-hero">
+    <div class="eyebrow">Executive Dashboard · Visão Geral</div>
+    <h1 class="page-title">Status <span>Report</span></h1>
+    <p class="page-subtitle">Dileta Pay · Painel executivo para apresentação a Diretoria. Horizonte 3 em execução. Múltiplas iniciativas estratégicas em andamento.</p>
+  </div>
+
+  <!-- ══════════ STAT STRIP ══════════ -->
+  <div class="stat-strip">
+    <div class="stat-item" data-tip="Iniciativas ativas no momento">
+      <div class="stat-num yellow">7</div>
+      <div class="stat-key">Iniciativas Ativas</div>
+    </div>
+    <div class="stat-item" data-tip="Horizontes concluídos">
+      <div class="stat-num green">2</div>
+      <div class="stat-key">Horizontes Concluídos</div>
+    </div>
+    <div class="stat-item" data-tip="Riscos identificados com acompanhamento">
+      <div class="stat-num red">3</div>
+      <div class="stat-key">Riscos Identificados</div>
+    </div>
+    <div class="stat-item" data-tip="Débitos técnicos mapeados">
+      <div class="stat-num yellow">4</div>
+      <div class="stat-key">Débitos Técnicos</div>
+    </div>
+  </div>
+
+  <!-- ══════════ EXECUTIVE SUMMARY ══════════ -->
+  <div class="section" data-category="resumo">
+    <div class="section-header">
+      <div class="section-label">01</div>
+      <h2 class="section-title">Sumário Executivo</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-yellow">Atenção</span>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-label">Status Geral</div>
+        <div style="display:flex; align-items:center; gap:12px; margin:12px 0;">
+          <span class="badge badge-yellow">Atenção</span>
+        </div>
+        <p class="card-desc">Operação estabilizando pós incidente. Horizonte 3 em execução com 4 frentes simultâneas. Horizonte 4 em planejamento.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Destaques</div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot green"></div>
+          <div class="item-text">Integração de boleto ADEN entregue</div>
+        </div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text">Atualização Angular com IA em andamento</div>
+        </div>
+        <div class="item-row" style="padding:8px 0; border:none;">
+          <div class="item-dot green"></div>
+          <div class="item-text">Rafael Coutinho assumindo novas responsabilidades</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Próximos Marcos</div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot red"></div>
+          <div class="item-text"><strong>20 Mai</strong> — Planejamento operacional concluído</div>
+        </div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text"><strong>Jun</strong> — Prévia LIA (IA Banking)</div>
+        </div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text"><strong>Jun</strong> — Início revisão UI Onboarding</div>
+        </div>
+        <div class="item-row" style="padding:8px 0; border:none;">
+          <div class="item-dot grey" style="background:var(--grey3)"></div>
+          <div class="item-text"><strong>Ago</strong> — MVP LIA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ HORIZONS TIMELINE ══════════ -->
+  <div class="section" data-category="horizonte">
+    <div class="section-header">
+      <div class="section-label">02</div>
+      <h2 class="section-title">Horizontes de Entrega</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="timeline-track">
+      <div class="horizon-node">
+        <div class="horizon-dot done" data-tip="Concluído">H1</div>
+        <div class="horizon-label">Horizonte 1</div>
+        <div class="horizon-sub">Concluído ✓</div>
+      </div>
+      <div class="horizon-node">
+        <div class="horizon-dot done" data-tip="Abril — Concluído">H2</div>
+        <div class="horizon-label">Horizonte 2</div>
+        <div class="horizon-sub">Abril · Concluído ✓</div>
+      </div>
+      <div class="horizon-node">
+        <div class="horizon-dot current" data-tip="Maio — Em execução">H3</div>
+        <div class="horizon-label">Horizonte 3</div>
+        <div class="horizon-sub">Maio · Atual</div>
+      </div>
+      <div class="horizon-node">
+        <div class="horizon-dot planned" data-tip="Junho — Planejado">H4</div>
+        <div class="horizon-label">Horizonte 4</div>
+        <div class="horizon-sub">Junho · Planejado</div>
+      </div>
+    </div>
+
+    <!-- Collapsible: H1 -->
+    <div style="margin-bottom:8px;">
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <div class="collapsible-header-left">
+          <span class="badge badge-green">Concluído</span>
+          <span class="collapsible-title">Horizonte 1 — Fundação</span>
+        </div>
+        <span class="collapsible-arrow">▼</span>
+      </div>
+      <div class="collapsible-body">
+        <div class="collapsible-content">
+          <div class="horizon-items">
+            <div class="horizon-item-card">
+              <div class="item-dot green"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">MED Aarin</div>
+                <div style="font-size:11px; color:var(--grey2);">Entregue em produção</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot green"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Integração com Data Rudder</div>
+                <div style="font-size:11px; color:var(--grey2);">Entregue em produção</div>
+              </div>
+            </div>
+            <div class="horizon-item-card" style="grid-column:span 2;">
+              <div class="item-dot yellow"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Bug Fixes</div>
+                <div style="font-size:11px; color:var(--yellow);">Contagem está sendo apurada ainda</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collapsible: H2 -->
+    <div style="margin-bottom:8px;">
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <div class="collapsible-header-left">
+          <span class="badge badge-green">Concluído</span>
+          <span class="collapsible-title">Horizonte 2 — Abril</span>
+        </div>
+        <span class="collapsible-arrow">▼</span>
+      </div>
+      <div class="collapsible-body">
+        <div class="collapsible-content">
+          <div class="horizon-items">
+            <div class="horizon-item-card">
+              <div class="item-dot green"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Novo Fluxo de Onboarding</div>
+                <div style="font-size:11px; color:var(--grey2);">Emergencial · HDC e ADEN</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot green"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Integração de Boleto ADEN</div>
+                <div style="font-size:11px; color:var(--grey2);">Entregue em produção</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot green"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Device Pairing — App Aarin</div>
+                <div style="font-size:11px; color:var(--grey2);">Entregue em produção</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot yellow"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Bug Fixes</div>
+                <div style="font-size:11px; color:var(--yellow);">Contagem está sendo apurada ainda</div>
+              </div>
+            </div>
+          </div>
+          <div class="highlight-quote">Abril marcado pelo projeto emergencial de onboarding. Entregue com débitos técnicos a endereçar no H4.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collapsible: H3 -->
+    <div style="margin-bottom:8px;">
+      <div class="collapsible-header open" onclick="toggleCollapsible(this)">
+        <div class="collapsible-header-left">
+          <span class="badge badge-red">Em Execução</span>
+          <span class="collapsible-title">Horizonte 3 — Maio (Atual)</span>
+        </div>
+        <span class="collapsible-arrow">▼</span>
+      </div>
+      <div class="collapsible-body open">
+        <div class="collapsible-content">
+          <div class="horizon-items">
+            <div class="horizon-item-card">
+              <div class="item-dot yellow"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Device Pairing (web admin)</div>
+                <div style="font-size:11px; color:var(--grey2);">Em desenvolvimento</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot yellow"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Pix Automático</div>
+                <div style="font-size:11px; color:var(--yellow);">20% · A ser concluído em Junho</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot yellow"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Atualização Angular com IA</div>
+                <div style="font-size:11px; color:var(--grey2);">Em andamento</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot yellow"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Revisões de Jornada de Onboarding</div>
+                <div style="font-size:11px; color:var(--grey2);">Login e Capital Empreendedor</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Pix Automático</span><span>20%</span></div>
+              <div class="progress-track"><div class="progress-fill yellow" data-target="20"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Device Pairing</span><span>45%</span></div>
+              <div class="progress-track"><div class="progress-fill" data-target="45"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Angular com IA</span><span>10%</span></div>
+              <div class="progress-track"><div class="progress-fill" data-target="10"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collapsible: H4 -->
+    <div>
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <div class="collapsible-header-left">
+          <span class="badge badge-grey">Planejado</span>
+          <span class="collapsible-title">Horizonte 4 — Junho (Planejado)</span>
+        </div>
+        <span class="collapsible-arrow">▼</span>
+      </div>
+      <div class="collapsible-body">
+        <div class="collapsible-content">
+          <div class="horizon-items">
+            <div class="horizon-item-card">
+              <div class="item-dot" style="background:var(--grey3)"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Revisão Completa UI Onboarding</div>
+                <div style="font-size:11px; color:var(--grey2);">Correção de débitos técnicos do H2</div>
+              </div>
+            </div>
+            <div class="horizon-item-card">
+              <div class="item-dot" style="background:var(--grey3)"></div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Evolução de Jornadas</div>
+                <div style="font-size:11px; color:var(--grey2);">PF + PJ, padronização de UI</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ EMERGENCY PROJECT ══════════ -->
+  <div class="section" data-category="horizonte">
+    <div class="section-header">
+      <div class="section-label">03</div>
+      <h2 class="section-title">Projeto Emergencial</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-red">Débitos Técnicos</span>
+    </div>
+
+    <div class="emergency-block">
+      <div class="emergency-header">
+        <span class="emergency-tag">Emergencial · Abril</span>
+        <span class="collapsible-title">Novo Fluxo de Onboarding</span>
+        <span class="badge badge-green" style="margin-left:auto;">Em Produção</span>
+      </div>
+      <div class="emergency-body">
+        <div class="grid-3">
+          <div>
+            <div class="card-label" style="margin-bottom:12px;">Implementado Para</div>
+            <div style="display:flex; gap:8px; flex-direction:column;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="badge badge-green">HDC</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="badge badge-green">ADEN (BaaS)</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card-label" style="margin-bottom:12px;">Problemas Identificados</div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot red"></div>
+              <div class="item-text">Inconsistência de UI</div>
+            </div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot red"></div>
+              <div class="item-text">Jornada confusa para o usuário</div>
+            </div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot red"></div>
+              <div class="item-text">Não suporta PF + PJ</div>
+            </div>
+            <div class="item-row" style="padding:6px 0; border:none;">
+              <div class="item-dot red"></div>
+              <div class="item-text">Falta de padronização</div>
+            </div>
+            <div class="item-row" style="padding:6px 0; border:none;">
+              <div class="item-dot red"></div>
+              <div class="item-text">Mais um padrão de Onboarding</div>
+            </div>
+          </div>
+          <div>
+            <div class="card-label" style="margin-bottom:12px;">Plano de Correção</div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot yellow"></div>
+              <div class="item-text"><strong>H3</strong> → Análise e acompanhamento</div>
+            </div>
+            <div class="item-row" style="padding:6px 0; border:none;">
+              <div class="item-dot" style="background:var(--grey3)"></div>
+              <div class="item-text"><strong>H4</strong> → Correção completa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BACKLOG / BUILD THE BANK ══════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">04</div>
+      <h2 class="section-title">Build the Bank · Backlog</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px; font-size:12px; color:var(--yellow);"><span>●</span> Regulatório</div>
+      <div style="display:flex;align-items:center;gap:6px; font-size:12px; color:#60A5FA;"><span>●</span> Feature</div>
+      <div style="display:flex;align-items:center;gap:6px; font-size:12px; color:#A78BFA;"><span>●</span> Refactoring</div>
+    </div>
+
+    <div class="backlog-grid">
+      <div class="backlog-item">
+        <div class="backlog-item-cat feature">Feature</div>
+        <div class="backlog-item-name">Pix Automático</div>
+        <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:10px; color:var(--grey2); font-family:var(--font-mono);">20%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill yellow" data-target="20" style="width:20%;"></div></div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat refactoring">Refactoring</div>
+        <div class="backlog-item-name">Desacoplamento</div>
+        <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:10px; color:var(--grey2); font-family:var(--font-mono);">25%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" data-target="25" style="width:25%;"></div></div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat feature">Feature</div>
+        <div class="backlog-item-name">Transferência V2</div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat regulatorio">Regulatório</div>
+        <div class="backlog-item-name">Reportologia</div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat feature">Feature</div>
+        <div class="backlog-item-name">Cartões Celcoin</div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat feature">Feature</div>
+        <div class="backlog-item-name">IA</div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat refactoring">Refactoring</div>
+        <div class="backlog-item-name">Upgrade Angular com IA</div>
+        <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:10px; color:var(--grey2); font-family:var(--font-mono);">10%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" data-target="10" style="width:10%;"></div></div>
+      </div>
+      <div class="backlog-item">
+        <div class="backlog-item-cat refactoring">Refactoring</div>
+        <div class="backlog-item-name">Melhorias e Padronização de Jornada Onboarding</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ ADEN ══════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">05</div>
+      <h2 class="section-title">Demandas ADEN</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-green">Ativo</span>
+    </div>
+
+    <div class="aden-block">
+      <div class="grid-2" style="gap:24px;">
+        <div>
+          <div class="card-label" style="margin-bottom:12px; color:#60A5FA;">Integração de Boleto</div>
+          <span class="badge badge-green" style="margin-bottom:12px; display:inline-flex;">Concluído</span>
+          <p style="font-size:13px; color:var(--grey1); margin-top:8px;">Integração entregue e em produção. Demanda finalizada com sucesso dentro do Horizonte 2.</p>
+
+          <div style="margin-top:20px;">
+            <div class="card-label" style="margin-bottom:12px; color:#60A5FA;">Modelo de Execução</div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot green"></div>
+              <div class="item-text">Execução contínua de melhorias</div>
+            </div>
+            <div class="item-row" style="padding:6px 0; border:none;">
+              <div class="item-dot yellow"></div>
+              <div class="item-text">Sem datas fixas — demanda fluida</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-label" style="margin-bottom:12px; color:#60A5FA;">Roadmap ADEN</div>
+          <div class="item-row" style="padding:8px 0;">
+            <div class="item-dot" style="background:#60A5FA;"></div>
+            <div class="item-text">Mostrar todos os tipos de limites <span style="color:var(--yellow); font-size:11px;">(pode demandar refatoração maior)</span></div>
+          </div>
+          <div class="item-row" style="padding:8px 0;">
+            <div class="item-dot" style="background:#60A5FA;"></div>
+            <div class="item-text">Botão Download de Extrato no App</div>
+          </div>
+          <div class="item-row" style="padding:8px 0;">
+            <div class="item-dot" style="background:#60A5FA;"></div>
+            <div class="item-text">Melhorias de Design (botão, splash screen)</div>
+          </div>
+          <div class="item-row" style="padding:8px 0; border:none;">
+            <div class="item-dot" style="background:#60A5FA;"></div>
+            <div class="item-text">Ativação do Bolepix</div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <div class="card-label" style="margin-bottom:12px; color:#60A5FA;">Status de Ambiente</div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot green"></div>
+              <div class="item-text"><strong>ADEN</strong> — Mais atualizado</div>
+            </div>
+            <div class="item-row" style="padding:6px 0;">
+              <div class="item-dot yellow"></div>
+              <div class="item-text"><strong>Celcoin</strong> — Intermediário</div>
+            </div>
+            <div class="item-row" style="padding:6px 0; border:none;">
+              <div class="item-dot red"></div>
+              <div class="item-text"><strong>Flagship</strong> — Defasado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ OPERATION ══════════ -->
+  <div class="section" data-category="operacao">
+    <div class="section-header">
+      <div class="section-label">06</div>
+      <h2 class="section-title">Operação · Bloco Estratégico</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-yellow">Reestruturação</span>
+    </div>
+
+    <div class="op-status">
+      <div class="op-block" style="border-color:rgba(255,59,48,0.2);">
+        <div class="op-block-title" style="color:var(--risk-red);">Situação Atual</div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Instabilidade operacional (pessoas) pós ataque hacker</div>
+        </div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Problemas de deploy recorrentes</div>
+        </div>
+        <div class="item-row" style="padding:8px 0; border:none;">
+          <div class="item-dot red"></div>
+          <div class="item-text">PRs acumuladas — gargalo de revisão</div>
+        </div>
+      </div>
+
+      <div class="op-block" style="border-color:rgba(234,179,8,0.2);">
+        <div class="op-block-title" style="color:var(--yellow);">Ações em Andamento</div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text">Revisão operacional completa</div>
+        </div>
+        <div class="item-row" style="padding:8px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text">Reestruturação do time técnico</div>
+        </div>
+        <div class="item-row" style="padding:8px 0; border:none;">
+          <div class="item-dot green"></div>
+          <div class="item-text">Planejamento estruturado até 20/05</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; background:var(--surface); border:1px solid var(--border); padding:20px;">
+      <div class="card-label" style="margin-bottom:16px;">Mudanças de Responsabilidade</div>
+      <div class="grid-3">
+        <div style="padding:16px; background:var(--surface2); border:1px solid var(--border);">
+          <div class="person-avatar" style="width:36px; height:36px; margin-bottom:10px; font-size:11px;">RC</div>
+          <div style="font-weight:500; font-size:13px; margin-bottom:4px;">Rafael Coutinho</div>
+          <span class="badge badge-green">+ Responsabilidades</span>
+          <p style="font-size:12px; color:var(--grey1); margin-top:8px;">Assumindo maior escopo técnico e liderança de iniciativas</p>
+        </div>
+        <div style="padding:16px; background:var(--surface2); border:1px solid var(--border);">
+          <div class="person-avatar" style="width:36px; height:36px; margin-bottom:10px; font-size:11px;">JU</div>
+          <div style="font-weight:500; font-size:13px; margin-bottom:4px;">Júlio</div>
+          <span class="badge badge-yellow">Redução de Carga</span>
+          <p style="font-size:12px; color:var(--grey1); margin-top:8px;">Redistribuição de demandas para evitar sobrecarga</p>
+        </div>
+        <div style="padding:16px; background:var(--surface2); border:1px solid var(--border);">
+          <div class="person-avatar" style="width:36px; height:36px; margin-bottom:10px; font-size:11px;">TH</div>
+          <div style="font-weight:500; font-size:13px; margin-bottom:4px;">Thalita</div>
+          <span class="badge badge-grey">Nova Trilha</span>
+          <p style="font-size:12px; color:var(--grey1); margin-top:8px;">Direcionamento para nova área de atuação</p>
+        </div>
+      </div>
+      <div style="margin-top:16px; padding:12px 16px; background:var(--red-dim); border:1px solid rgba(227,6,19,0.2); display:flex; align-items:center; gap:12px;">
+        <span class="badge badge-red">Meta</span>
+        <span style="font-size:13px; color:var(--grey1);">Planejamento completo e operação estabilizada até <strong style="color:var(--white);">20 de Maio</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ LIA / IA PROJECT ══════════ -->
+  <div class="section" data-category="ia">
+    <div class="section-header">
+      <div class="section-label">07</div>
+      <h2 class="section-title">Projeto de IA · LIA</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-grey">Em Desenvolvimento</span>
+    </div>
+
+    <div class="ia-block">
+      <div class="grid-2" style="gap:32px; align-items:start;">
+        <div>
+          <div class="eyebrow" style="margin-bottom:12px;">Assistente de IA com Avatar</div>
+          <p style="font-size:15px; color:var(--grey1); line-height:1.7; margin-bottom:20px;">
+            LIA é um assistente de IA com avatar que demonstra transações financeiras reais em tempo real. 
+            Objetivo central: <strong style="color:var(--white);">demonstrar o futuro do banking com inteligência artificial</strong>.
+          </p>
+
+          <div style="margin-bottom:20px;">
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Desenvolvimento MVP</span><span>20%</span></div>
+              <div class="progress-track"><div class="progress-fill" data-target="20" style="width:20%;"></div></div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; flex-direction:column;">
+            <div style="padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:13px;">Prévia LIA</span>
+              <span class="badge badge-grey">Junho</span>
+            </div>
+            <div style="padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:13px;">MVP Completo</span>
+              <span class="badge badge-grey">Agosto</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card-label" style="margin-bottom:16px;">Escopo do MVP</div>
+          <div class="ia-mvp-grid">
+            <div class="ia-mvp-item">
+              <div class="ia-mvp-icon">⚡</div>
+              <div class="ia-mvp-label">PIX ponta a ponta</div>
+            </div>
+            <div class="ia-mvp-item">
+              <div class="ia-mvp-icon">🔐</div>
+              <div class="ia-mvp-label">Autenticação</div>
+            </div>
+            <div class="ia-mvp-item">
+              <div class="ia-mvp-icon">📋</div>
+              <div class="ia-mvp-label">Logs de segurança</div>
+            </div>
+            <div class="ia-mvp-item">
+              <div class="ia-mvp-icon">🧠</div>
+              <div class="ia-mvp-label">Visualização do processamento IA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ CORE FLOW ══════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">08</div>
+      <h2 class="section-title">Core Flow</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-yellow">Em Definição</span>
+    </div>
+
+    <div class="card">
+      <div class="grid-2" style="gap:32px; align-items:start;">
+        <div>
+          <div class="card-label" style="margin-bottom:12px;">Status do Projeto</div>
+          <p style="font-size:13px; color:var(--grey1); line-height:1.7;">
+            Core Flow está em fase de definição estratégica. Revisões em curso com stakeholders-chave para alinhamento de escopo, prioridades e arquitetura.
+          </p>
+          <div style="margin-top:16px;">
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Definição e Alinhamento</span><span>35%</span></div>
+              <div class="progress-track"><div class="progress-fill" data-target="35" style="width:35%;"></div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-label" style="margin-bottom:12px;">Revisões com</div>
+          <div class="core-flow-people">
+            <div class="person-chip">
+              <div class="person-avatar">CG</div>
+              Celso Gonçalves
+            </div>
+            <div class="person-chip">
+              <div class="person-avatar">GQ</div>
+              Gustavo Quezada
+            </div>
+            <div class="person-chip">
+              <div class="person-avatar">JU</div>
+              Júlio
+            </div>
+            <div class="person-chip">
+              <div class="person-avatar">RC</div>
+              Rafael Coutinho
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ RISKS ══════════ -->
+  <div class="section" data-category="risco">
+    <div class="section-header">
+      <div class="section-label">09</div>
+      <h2 class="section-title">Riscos Identificados</h2>
+      <div class="section-line"></div>
+      <span class="badge badge-red">Alta Visibilidade</span>
+    </div>
+
+    <div class="grid-3">
+      <div class="risk-card" data-risk="01">
+        <div class="risk-number">Risco 01</div>
+        <div class="risk-title">Sobrecarga do Júlio</div>
+        <div class="item-row" style="padding:6px 0;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Impacto direto no volume de PRs revisadas</div>
+        </div>
+        <div class="item-row" style="padding:6px 0; border:none;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Gargalo de aprovação de código</div>
+        </div>
+        <div class="risk-mitigation">
+          <div class="risk-mitigation-label">Mitigação</div>
+          <div class="risk-mitigation-text">Dia dedicado exclusivamente à validação de PRs</div>
+        </div>
+      </div>
+
+      <div class="risk-card" data-risk="02">
+        <div class="risk-number">Risco 02</div>
+        <div class="risk-title">Possível Saída da ADEN</div>
+        <div class="item-row" style="padding:6px 0;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Impacto em continuidade e conhecimento</div>
+        </div>
+        <div class="item-row" style="padding:6px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text">ADEN → ambiente mais atualizado</div>
+        </div>
+        <div class="item-row" style="padding:6px 0;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text">Celcoin → intermediário</div>
+        </div>
+        <div class="item-row" style="padding:6px 0; border:none;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Flagship → defasado</div>
+        </div>
+        <div class="risk-mitigation">
+          <div class="risk-mitigation-label">Monitorar</div>
+          <div class="risk-mitigation-text">Acompanhamento semanal e plano de contingência</div>
+        </div>
+      </div>
+
+      <div class="risk-card" data-risk="03">
+        <div class="risk-number">Risco 03</div>
+        <div class="risk-title">Operação & Métricas</div>
+        <div class="item-row" style="padding:6px 0;">
+          <div class="item-dot red"></div>
+          <div class="item-text">Descontinuidade do Zendesk</div>
+        </div>
+        <div class="item-row" style="padding:6px 0; border:none;">
+          <div class="item-dot yellow"></div>
+          <div class="item-text">Métricas de qualidade em observação</div>
+        </div>
+        <div class="risk-mitigation">
+          <div class="risk-mitigation-label">Mitigação</div>
+          <div class="risk-mitigation-text">Revisão operacional e reforço temporário de atendimento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div><!-- /shell -->
+
+<!-- ══════════ FOOTER ══════════ -->
+<div style="border-top:1px solid var(--border); padding:24px 32px; display:flex; justify-content:space-between; align-items:center; max-width:1400px; margin:0 auto;">
+  <div style="font-family:var(--font-mono); font-size:11px; color:var(--grey2); text-transform:uppercase; letter-spacing:0.08em;">Dileta Pay · Board Review · Maio 2025</div>
+  <div style="font-family:var(--font-mono); font-size:11px; color:var(--grey2);">Horizonte 3 em execução</div>
+</div>
+
+<script>
+  // ─── COLLAPSIBLE ───
+  function toggleCollapsible(header) {
+    const body = header.nextElementSibling;
+    const isOpen = header.classList.contains('open');
+
+    if (isOpen) {
+      header.classList.remove('open');
+      body.classList.remove('open');
+    } else {
+      header.classList.add('open');
+      body.classList.add('open');
+    }
+  }
+
+  // ─── PROGRESS BARS ANIMATION ───
+  function animateProgress() {
+    document.querySelectorAll('.progress-fill[data-target]').forEach(bar => {
+      const target = bar.getAttribute('data-target');
+      setTimeout(() => {
+        bar.style.width = target + '%';
+      }, 300);
+    });
+  }
+
+  // ─── FILTER ───
+  function filterAll(btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section[data-category]').forEach(s => {
+      s.style.display = '';
+    });
+  }
+
+  function filterSection(btn, category) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section[data-category]').forEach(s => {
+      if (s.getAttribute('data-category') === category) {
+        s.style.display = '';
+      } else {
+        s.style.display = 'none';
+      }
+    });
+  }
+
+  // ─── INTERSECTION OBSERVER FOR PROGRESS ───
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.progress-fill[data-target]').forEach(bar => {
+          const target = bar.getAttribute('data-target');
+          bar.style.width = target + '%';
+        });
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.section, .collapsible-content, .emergency-body, .card, .ia-block').forEach(el => {
+    observer.observe(el);
+  });
+
+  // ─── BACKLOG HOVER DETAIL ───
+  document.querySelectorAll('.backlog-item').forEach(item => {
+    item.addEventListener('click', function() {
+      this.classList.toggle('selected');
+    });
+  });
+
+  // ─── INITIAL ANIMATION ───
+  window.addEventListener('load', () => {
+    animateProgress();
+    // Stagger sections
+    document.querySelectorAll('.section').forEach((s, i) => {
+      s.style.animationDelay = (i * 0.07) + 's';
+    });
+  });
+</script>
+</body>
+</html>
