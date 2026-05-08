@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diletta Pay Suite — Dashboard Estratégico</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #080c14;
+  --bg2: #0d1220;
+  --bg3: #111827;
+  --card: #131c2e;
+  --card2: #19243a;
+  --border: #1e2d47;
+  --border2: #253a5a;
+  --text: #e2e8f4;
+  --text2: #8899bb;
+  --text3: #546480;
+  --blue: #2e7cf6;
+  --blue2: #4e9bff;
+  --cyan: #00d4f5;
+  --cyan2: #5ef0ff;
+  --purple: #7c3aed;
+  --purple2: #a855f7;
+  --purple3: #c084fc;
+  --violet: #6d28d9;
+  --green: #10b981;
+  --green2: #34d399;
+  --amber: #f59e0b;
+  --amber2: #fbbf24;
+  --red: #ef4444;
+  --red2: #f87171;
+  --orange: #f97316;
+  --gray: #374151;
+  --gray2: #4b5563;
+  --cf-color: #00c6ff;
+  --ia-color: #a855f7;
+  --plus-color: #3b82f6;
+  --panel-w: 380px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 7px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 10px;
+}
+.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+.logo-text { font-size: 13px; font-weight: 600; }
+.logo-sub { font-size: 9px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+.header-search {
+  flex: 1; max-width: 260px;
+  display: flex; align-items: center;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0 9px; gap: 5px;
+}
+.header-search input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: inherit; font-size: 11px;
+  width: 100%; padding: 5px 0;
+}
+.header-search input::placeholder { color: var(--text3); }
+
+.header-filters { display: flex; gap: 5px; align-items: center; }
+.filter-select {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); font-family: inherit; font-size: 10px;
+  border-radius: 5px; padding: 4px 7px; cursor: pointer; outline: none;
+}
+.filter-select option { background: var(--bg2); }
+
+.header-legend { display: flex; gap: 8px; align-items: center; margin-left: auto; flex-shrink: 0; }
+.leg-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--text3); }
+.leg-dot { width: 7px; height: 7px; border-radius: 2px; }
+
+/* ── NAV TABS ── */
+.nav-bar {
+  display: flex; align-items: center;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.nav-tab {
+  padding: 8px 13px;
+  font-size: 11px; font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+  display: flex; align-items: center; gap: 5px;
+  user-select: none;
+}
+.nav-tab:hover { color: var(--text2); }
+.nav-tab.active { color: var(--cyan2); border-bottom-color: var(--cyan2); }
+.nav-badge {
+  background: var(--border); color: var(--text3);
+  border-radius: 10px; padding: 1px 5px; font-size: 9px;
+  font-family: 'DM Mono', monospace;
+}
+.nav-tab.active .nav-badge { background: rgba(0,212,245,0.15); color: var(--cyan2); }
+
+/* ── DEP LEGEND BAR ── */
+.dep-bar {
+  display: none; align-items: center; gap: 12px;
+  padding: 5px 14px; background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px; color: var(--text3);
+  flex-shrink: 0;
+}
+.dep-bar.visible { display: flex; }
+.dep-bar-item { display: flex; align-items: center; gap: 4px; }
+.dep-bar-box { width: 11px; height: 11px; border-radius: 2px; border-width: 1px; border-style: solid; }
+.dep-bar-btn {
+  margin-left: auto; background: var(--border); border: none;
+  color: var(--text3); font-family: inherit; font-size: 10px;
+  padding: 3px 7px; border-radius: 4px; cursor: pointer;
+}
+
+/* ── MAIN ── */
+.main { display: flex; flex: 1; overflow: hidden; }
+.content { flex: 1; overflow-y: auto; padding: 10px 12px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── SECTION DIVIDERS ── */
+.section-divider {
+  display: flex; align-items: center; gap: 8px;
+  margin: 12px 0 6px;
+}
+.section-divider:first-child { margin-top: 0; }
+.section-divider-label {
+  font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text3); white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--border); }
+.section-divider-count {
+  font-size: 9px; color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── MOSAIC GRID ── */
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  gap: 8px;
+}
+
+/* ── CARD BASE ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s, opacity .15s, transform .15s;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { border-color: var(--border2); background: var(--card2); transform: translateY(-1px); }
+.card.selected {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 0 1px var(--cyan), 0 0 12px rgba(0,212,245,0.15) !important;
+}
+.card.dep-of {
+  border-color: var(--orange) !important;
+  box-shadow: 0 0 0 1px var(--orange), 0 0 8px rgba(249,115,22,0.2) !important;
+}
+.card.dep-by {
+  border-color: var(--blue2) !important;
+  box-shadow: 0 0 0 1px var(--blue2), 0 0 8px rgba(78,155,255,0.2) !important;
+}
+.card.dimmed { opacity: .28; }
+
+/* IA / CoreFlow card flavors */
+.card.ia-pure {
+  border-color: rgba(168,85,247,0.45);
+  background: linear-gradient(135deg, #131c2e 0%, #1a1035 100%);
+  box-shadow: 0 0 14px rgba(168,85,247,0.1);
+}
+.card.ia-pure:hover { box-shadow: 0 0 20px rgba(168,85,247,0.22); }
+.card.ia-plus { box-shadow: 0 0 8px rgba(59,130,246,0.06); }
+.card.ia-plus:hover { box-shadow: 0 0 12px rgba(59,130,246,0.14); }
+.card.cf-card {
+  border-color: rgba(0,198,255,0.4);
+  background: linear-gradient(135deg, #131c2e 0%, #0d1d2e 100%);
+}
+
+/* Backlog */
+.card.backlog-card { border-style: dashed; opacity: .78; }
+.card.backlog-card:hover { opacity: .95; }
+
+/* Dependency context — shown as dep of current view */
+.card.ctx-dep {
+  opacity: .65;
+}
+.card.ctx-dep:hover { opacity: .9; }
+
+/* ── CARD INTERNALS ── */
+.card-accent { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.ia-glow-ring {
+  position: absolute; inset: 0; border-radius: 7px;
+  background: radial-gradient(ellipse at top right, rgba(168,85,247,0.07) 0%, transparent 60%);
+  pointer-events: none;
+}
+.ia-plus-ring {
+  position: absolute; inset: 0; border-radius: 7px;
+  background: radial-gradient(ellipse at top right, rgba(59,130,246,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 5px; }
+.card-name { font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--text); flex: 1; }
+.card.ia-pure .card-name { color: var(--purple3); }
+.card.cf-card .card-name { color: var(--cyan2); }
+
+.badges { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+
+.badge {
+  font-size: 8px; font-weight: 700; letter-spacing: .04em;
+  padding: 2px 4px; border-radius: 3px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.b-ia-pure { background: rgba(168,85,247,0.18); color: var(--purple3); border: 1px solid rgba(168,85,247,0.3); }
+.b-ia-plus { background: rgba(59,130,246,0.14); color: #93c5fd; border: 1px solid rgba(59,130,246,0.28); }
+.b-hab-ia { background: rgba(0,212,245,0.1); color: var(--cyan2); border: 1px solid rgba(0,212,245,0.22); }
+.b-sem-ia { background: rgba(100,116,139,0.12); color: var(--text3); border: 1px solid rgba(100,116,139,0.18); }
+.b-backlog { background: rgba(245,158,11,0.14); color: var(--amber2); border: 1px solid rgba(245,158,11,0.28); }
+.b-dev { background: rgba(16,185,129,0.1); color: var(--green2); border: 1px solid rgba(16,185,129,0.22); }
+.b-exists { background: rgba(100,116,139,0.1); color: var(--text3); border: 1px solid rgba(100,116,139,0.18); }
+.b-ctx { background: rgba(100,116,139,0.08); color: var(--text3); border: 1px solid rgba(100,116,139,0.15); font-style: italic; }
+
+.card-meta {
+  font-size: 9px; color: var(--text3);
+  display: flex; gap: 3px; align-items: center; flex-wrap: wrap; margin-bottom: 4px;
+}
+.meta-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+.card-desc {
+  font-size: 10px; color: var(--text2); line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.card-warning {
+  margin-top: 5px; padding: 3px 5px;
+  background: rgba(249,115,22,0.07);
+  border: 1px solid rgba(249,115,22,0.22);
+  border-radius: 3px; font-size: 8px; color: var(--orange);
+}
+
+/* ── SIDE PANEL ── */
+.side-panel {
+  width: 0; overflow: hidden;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  transition: width .28s;
+  flex-shrink: 0;
+}
+.side-panel.open { width: var(--panel-w); }
+
+.panel-inner {
+  width: var(--panel-w); height: 100%;
+  overflow-y: auto; padding: 15px;
+  position: relative;
+}
+.panel-inner::-webkit-scrollbar { width: 4px; }
+.panel-inner::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.panel-close {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--border); border: none;
+  color: var(--text2); width: 22px; height: 22px;
+  border-radius: 4px; cursor: pointer; font-size: 11px;
+}
+
+.panel-id { font-size: 9px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 3px; }
+.panel-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; padding-right: 28px; }
+.panel-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+
+.ps { margin-bottom: 11px; }
+.ps-title {
+  font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 4px; padding-bottom: 3px;
+  border-bottom: 1px solid var(--border);
+}
+.ps-body { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+.dep-list { display: flex; flex-direction: column; gap: 3px; }
+.dep-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 7px; border-radius: 4px;
+  background: var(--bg3); font-size: 10px; color: var(--text2);
+  cursor: pointer; transition: background .12s;
+}
+.dep-item:hover { background: var(--border); color: var(--text); }
+.dep-arr { font-size: 8px; color: var(--text3); }
+.dep-id { font-size: 8px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+.ia-box {
+  padding: 7px 9px; border-radius: 5px;
+  background: rgba(168,85,247,0.07); border: 1px solid rgba(168,85,247,0.18);
+  font-size: 10px; color: var(--purple3); line-height: 1.4;
+}
+.ia-box.plus {
+  background: rgba(59,130,246,0.07); border-color: rgba(59,130,246,0.18);
+  color: #93c5fd;
+}
+
+.journey-steps {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.j-step {
+  display: flex; align-items: flex-start; gap: 7px;
+  padding: 5px 7px; border-radius: 5px;
+  background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15);
+  font-size: 10px; color: var(--text2);
+}
+.j-num {
+  font-size: 9px; font-weight: 700; color: var(--purple3);
+  font-family: 'DM Mono', monospace; flex-shrink: 0; padding-top: 1px;
+}
+
+.lia-exec-msg {
+  padding: 8px 10px;
+  background: linear-gradient(135deg, rgba(0,198,255,0.06), rgba(168,85,247,0.06));
+  border: 1px solid rgba(0,198,255,0.2);
+  border-radius: 6px; font-size: 11px; color: var(--cyan2); line-height: 1.5;
+  font-style: italic;
+}
+
+.must-have-list { display: flex; flex-direction: column; gap: 3px; }
+.mh-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--text2); padding: 3px 0;
+}
+.mh-dot-req { color: var(--red2); font-size: 8px; }
+.mh-dot-nice { color: var(--text3); font-size: 8px; }
+
+.chan-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+.chan-tag {
+  background: var(--bg3); color: var(--text2);
+  border: 1px solid var(--border2); border-radius: 3px;
+  padding: 1px 5px; font-size: 9px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">DP</div>
+    <div>
+      <div class="logo-text">Diletta Pay Suite</div>
+      <div class="logo-sub">CoreFlow · IA · Dashboard</div>
+    </div>
+  </div>
+
+  <div class="header-search">
+    <span style="color:var(--text3);font-size:11px">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar card, módulo, dependência…" oninput="applySearch()">
+  </div>
+
+  <div class="header-filters">
+    <select class="filter-select" id="filterOrigem" onchange="applySearch()">
+      <option value="">Origem</option>
+      <option value="Canal">Canal</option>
+      <option value="BaaS">BaaS</option>
+      <option value="CoreFlow">CoreFlow</option>
+      <option value="IA">IA</option>
+    </select>
+    <select class="filter-select" id="filterIA" onchange="applySearch()">
+      <option value="">Tipo IA</option>
+      <option value="ia-pure">IA Pura</option>
+      <option value="ia-plus">Potencial IA</option>
+      <option value="hab-ia">Habilitador IA</option>
+      <option value="sem-ia">Sem IA</option>
+    </select>
+    <button onclick="clearSearch()" style="background:var(--border);border:none;color:var(--text3);font-family:inherit;font-size:10px;padding:4px 7px;border-radius:4px;cursor:pointer;">✕</button>
+  </div>
+
+  <div class="header-legend">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--ia-color)"></div>IA Pura</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--plus-color)"></div>Pot. IA</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--cf-color)"></div>CoreFlow</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Backlog</div>
+    <div class="leg-item"><div class="leg-dot" style="background:rgba(100,116,139,0.5);border:1px dashed #546480"></div>Dep.</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar">
+  <div class="nav-tab active" id="ntab-todos" onclick="setView('todos')">
+    Todos <span class="nav-badge" id="cnt-todos">0</span>
+  </div>
+  <div class="nav-tab" id="ntab-produto" onclick="setView('produto')">
+    Produto Base <span class="nav-badge" id="cnt-produto">0</span>
+  </div>
+  <div class="nav-tab" id="ntab-backlog" onclick="setView('backlog')">
+    Backlog <span class="nav-badge" id="cnt-backlog">0</span>
+  </div>
+  <div class="nav-tab" id="ntab-potencia" onclick="setView('potencia')">
+    Potencialização IA <span class="nav-badge" id="cnt-potencia">0</span>
+  </div>
+  <div class="nav-tab" id="ntab-iasolucoes" onclick="setView('iasolucoes')">
+    Soluções IA <span class="nav-badge" id="cnt-iasolucoes">0</span>
+  </div>
+  <div class="nav-tab" id="ntab-coreflow" onclick="setView('coreflow')">
+    CoreFlow <span class="nav-badge" id="cnt-coreflow">0</span>
+  </div>
+</div>
+
+<!-- DEP LEGEND BAR -->
+<div class="dep-bar" id="depBar">
+  <span style="font-weight:600;color:var(--text2)">Dependências:</span>
+  <div class="dep-bar-item">
+    <div class="dep-bar-box" style="background:rgba(249,115,22,0.12);border-color:var(--orange)"></div>
+    Este card depende de…
+  </div>
+  <div class="dep-bar-item">
+    <div class="dep-bar-box" style="background:rgba(78,155,255,0.12);border-color:var(--blue2)"></div>
+    Outros dependem deste
+  </div>
+  <div class="dep-bar-item">
+    <div class="dep-bar-box" style="background:rgba(0,212,245,0.12);border-color:var(--cyan)"></div>
+    Selecionado
+  </div>
+  <button class="dep-bar-btn" onclick="clearSelection()">Limpar seleção</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content" id="mainContent">
+    <div id="mosaicContainer"></div>
+  </div>
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-inner" id="panelInner">
+      <button class="panel-close" onclick="closePanel()">✕</button>
+      <div id="panelContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const CARDS = [
+  // ── PRODUTO BASE ──
+  { id:"C01", name:"App", cat:"Experiência e Canais", origem:"Canal", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Atalhos inteligentes, hiperpersonalização de menus, assistente no canal.",
+    desc:"Canal digital mobile para saldo, extrato, PIX, pagamentos, perfil e notificações.",
+    valD:"Canal financeiro white-label sobre BaaS.", valC:"Experiência digital de operação da conta.",
+    deps:["C08","C05"], aviso:null, group:"produto" },
+
+  { id:"C02", name:"Internet Banking", cat:"Experiência e Canais", origem:"Canal", canais:["IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Busca inteligente, extrato inteligente e copiloto para operações PJ.",
+    desc:"Canal web do correntista para operações financeiras e consultas.",
+    valD:"Amplia portfólio de canal e atende PJ.", valC:"Operação financeira web.",
+    deps:["C08","C05"], aviso:null, group:"produto" },
+
+  { id:"C03", name:"WA Web Admin", cat:"Experiência e Canais", origem:"Canal", canais:["WA"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Copiloto operacional para sugerir regras, detectar anomalias e orientar admins.",
+    desc:"Console do administrador do banco/cliente Diletta.",
+    valD:"Governança e controle operacional.", valC:"Indireto; melhora gestão.",
+    deps:["C08","C07"], aviso:null, group:"produto" },
+
+  { id:"C08", name:"Autenticação e Gestão de Sessão", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App","IB","Lia"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Análise de risco contextual para step-up auth. Anomalias de login.",
+    desc:"Controle de login, sessão, PIN e contexto autenticado. Pré-requisito para qualquer transação.",
+    valD:"Pré-requisito para qualquer transação segura.", valC:"Acesso seguro.",
+    deps:[], aviso:null, group:"produto" },
+
+  { id:"C09", name:"Device Pairing", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Sinal de risco para detecção de comportamento anômalo.",
+    desc:"Vinculação segura entre usuário, dispositivo e canal.",
+    valD:"Reduz fraude, aumenta segurança.", valC:"Confiança no uso mobile.",
+    deps:["C08"], aviso:null, group:"produto" },
+
+  { id:"C10", name:"Biometria", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App"],
+    status:"exists", ia:"sem-ia",
+    iaSug:null,
+    desc:"Autenticação biométrica no mobile.",
+    valD:"Melhora segurança percebida.", valC:"Facilita autenticação.",
+    deps:["C08"], aviso:null, group:"produto" },
+
+  { id:"C11", name:"Onboarding PF", cat:"Onboarding e Cadastro", origem:"BaaS", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Onboarding assistido, coleta guiada e OCR para simplificação.",
+    desc:"Cadastro de conta pessoa física. Padronização e independência de BaaS em andamento.",
+    valD:"Acelera ativação do cliente final.", valC:"Permite abertura de conta.",
+    deps:["C13"], aviso:null, group:"produto" },
+
+  { id:"C12", name:"Onboarding PJ", cat:"Onboarding e Cadastro", origem:"Canal", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Assistente para documentação PJ. OCR e leitura inteligente de contrato social.",
+    desc:"Cadastro de conta pessoa jurídica. Em revisão para qualidade.",
+    valD:"Suporta PJ e estruturas empresariais.", valC:"Facilita entrada de empresas.",
+    deps:["C13"], aviso:null, group:"produto" },
+
+  { id:"C13", name:"KYC e Antifraude", cat:"Segurança", origem:"BaaS", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Detecção de anomalias, score de risco, Facematch e Liveness com IA.",
+    desc:"Validação de identidade, documentos e risco.",
+    valD:"Reduz risco de fraude e compliance.", valC:"Proteção ao correntista.",
+    deps:[], aviso:null, group:"produto" },
+
+  { id:"C14", name:"Saldo", cat:"Conta, Saldo e Extrato", origem:"BaaS", canais:["App","Lia"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Resposta conversacional e alertas inteligentes.",
+    desc:"Consulta de saldo da conta.",
+    valD:"Serviço básico de canal financeiro.", valC:"Visibilidade financeira simples.",
+    deps:["C08"], aviso:null, group:"produto" },
+
+  { id:"C15", name:"Extrato", cat:"Conta, Saldo e Extrato", origem:"BaaS", canais:["App","IB","Lia"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Perguntas em linguagem natural, categorização e padrões financeiros.",
+    desc:"Consulta de histórico financeiro. Base para inteligência financeira.",
+    valD:"Base para inteligência financeira.", valC:"Entendimento de movimentações.",
+    deps:["C08","C14"], aviso:null, group:"produto" },
+
+  { id:"C17", name:"PIX Gestão de Chaves", cat:"PIX e Transferências", origem:"BaaS", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Assistente guiando criação, portabilidade e dúvidas.",
+    desc:"Criação, remoção, portabilidade e reivindicação de chaves PIX.",
+    valD:"Completa oferta PIX.", valC:"Facilita uso de PIX.",
+    deps:["C08","C28"], aviso:null, group:"produto" },
+
+  { id:"C18", name:"PIX Transacional", cat:"PIX e Transferências", origem:"BaaS", canais:["App","IB","Lia"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"PIX assistido, alertas de transações indevidas, sugestões de agendamento.",
+    desc:"Execução de PIX via QR, copia-cola, cobrança, transferência e devolução.",
+    valD:"Principal capacidade transacional para demo.", valC:"Transações reais.",
+    deps:["C08","C14","C28","C35"], aviso:null, group:"produto" },
+
+  { id:"C19", name:"PIX Agendamento", cat:"PIX e Transferências", origem:"Canal", canais:["App","IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Agendamento por linguagem natural e lembretes inteligentes.",
+    desc:"Agendamento de PIX. Conveniência de pagamentos futuros.",
+    valD:"Agrega conveniência ao canal.", valC:"Permite programar pagamentos.",
+    deps:["C08","C18"], aviso:null, group:"produto" },
+
+  { id:"C20", name:"Transferências Internas", cat:"PIX e Transferências", origem:"BaaS", canais:["App","IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Atalho contextual para contatos frequentes.",
+    desc:"Transferência entre contas internas.",
+    valD:"Serviço financeiro básico.", valC:"Movimentação simplificada.",
+    deps:["C08","C14","C18"], aviso:null, group:"produto" },
+
+  { id:"C21", name:"Boletos e Pagamentos", cat:"Pagamentos, Boletos e Cobranças", origem:"BaaS", canais:["App","IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Leitura assistida, alertas de vencimento, integração com DDA.",
+    desc:"Pagamento de boletos, ficha de compensação e concessionárias.",
+    valD:"Amplia portfólio transacional.", valC:"Paga contas pelo canal.",
+    deps:["C08","C35"], aviso:null, group:"produto" },
+
+  { id:"C22", name:"Pagamentos em Lote", cat:"Pagamentos, Boletos e Cobranças", origem:"Canal", canais:["IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Checagem inteligente de lote, identificação de divergências CNAB.",
+    desc:"Execução de pagamentos em lote. Essencial para clientes PJ.",
+    valD:"Valor para PJ e operação empresarial.", valC:"Automatiza múltiplos pagamentos.",
+    deps:["C08","C23","C21","C35"], aviso:null, group:"produto" },
+
+  { id:"C23", name:"Aprovação de Pagamento", cat:"Limites, Alçadas e Aprovações", origem:"Canal", canais:["App","IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Sugerir risco para aprovações fora do padrão, priorizar aprovações.",
+    desc:"Fluxo de aprovação de pagamentos. Governança para operações críticas.",
+    valD:"Governança para operações críticas.", valC:"Controle transacional.",
+    deps:["C08","C07"], aviso:null, group:"produto" },
+
+  { id:"C24", name:"Cobranças", cat:"Pagamentos, Boletos e Cobranças", origem:"Ambos", canais:["App","IB"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Sugerir cobrança, follow-up, antecipação de recebíveis.",
+    desc:"Geração e gerenciamento de cobranças.",
+    valD:"Suporta recebíveis e fluxo comercial.", valC:"Facilita recebimentos.",
+    deps:["C08"], aviso:null, group:"produto" },
+
+  { id:"C25", name:"Cash-in", cat:"Conta e Transações", origem:"BaaS", canais:["App","IB"],
+    status:"exists", ia:"sem-ia",
+    iaSug:null,
+    desc:"Receber e colocar dinheiro na conta. Completa ciclo financeiro.",
+    valD:"Completa ciclo financeiro.", valC:"Entrada de recursos.",
+    deps:[], aviso:null, group:"produto" },
+
+  { id:"C26", name:"Lista de Contatos", cat:"Experiência e Contexto", origem:"Canal", canais:["App","Lia"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Hiperpersonalização e atalhos de transação por histórico.",
+    desc:"Cadastro de contatos para facilitar operações.",
+    valD:"Melhora usabilidade e recorrência.", valC:"Facilita transações frequentes.",
+    deps:[], aviso:null, group:"produto" },
+
+  { id:"C27", name:"Notificações Push", cat:"Experiência e Canais", origem:"Canal", canais:["App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Alertas personalizados e recomendações contextuais.",
+    desc:"Comunicação ativa com correntista.",
+    valD:"Engajamento e segurança.", valC:"Recebe alertas e confirmações.",
+    deps:[], aviso:null, group:"produto" },
+
+  { id:"C28", name:"Limites Gerais e PIX", cat:"Limites, Alçadas e Aprovações", origem:"BaaS", canais:["WA","App"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Sugestão e autoajuste de limites por comportamento e risco.",
+    desc:"Gestão e visualização de limites PIX.",
+    valD:"Mitiga fraude e parametriza risco.", valC:"Mais controle e segurança.",
+    deps:["C35"], aviso:null, group:"produto" },
+
+  { id:"C35", name:"Segurança Transacional", cat:"Segurança", origem:"Canal+CoreFlow+BaaS", canais:["Todos"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Detecção de abuso, limites dinâmicos e alertas de anomalia.",
+    desc:"Conjunto de controles contra execução indevida e fraude.",
+    valD:"Pilar de confiança da oferta.", valC:"Proteção em transações.",
+    deps:["C08","C28","C36"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
+
+  { id:"C36", name:"Rate Limiting", cat:"Segurança e Orquestração", origem:"CoreFlow", canais:["Todos"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Identificar padrões abusivos e ajustar limites de chamada.",
+    desc:"Controle de volume/frequência de chamadas. Crítico para agentes IA.",
+    valD:"Evita abuso e protege infra.", valC:"Evita instabilidade.",
+    deps:["C05"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
+
+  // ── COREFLOW modules (shown in produto + coreflow views) ──
+  { id:"C04", name:"CoreFlow", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia","API"],
+    status:"dev", ia:"hab-ia",
+    iaSug:"Camada para agentes acionarem serviços financeiros com contexto e segurança.",
+    desc:"Camada de orquestração para modularizar serviços, regras, integrações e inteligência.",
+    valD:"Ativo modular e vendável.", valC:"Consistência e velocidade.",
+    deps:["C05","C07","C37"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+
+  { id:"C05", name:"BFF / Camada de Integração e API", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia","API"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Contexto estruturado para agentes e logs interpretáveis.",
+    desc:"Backend for Frontend modular. Abstrai complexidade dos BaaS.",
+    valD:"Reduz acoplamento e variação por provedor.", valC:"Respostas mais consistentes.",
+    deps:["C08"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+
+  { id:"C07", name:"Business Engine", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Sugestão de regras de negócio, autoajuste de limites e automação assistida.",
+    desc:"Motor configurável para regras, limites, alçadas e workflows.",
+    valD:"Vende parametrização e flexibilidade.", valC:"Regras mais consistentes.",
+    deps:["C05"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+
+  { id:"C29", name:"Observabilidade Base", cat:"Segurança, Auditoria e Observabilidade", origem:"CoreFlow", canais:["Todos"],
+    status:"dev", ia:"hab-ia",
+    iaSug:"Base para explicabilidade, detecção e copiloto operacional.",
+    desc:"Monitoramento essencial, logs e alertas básicos. Crítico para feira e produção.",
+    valD:"Aumenta confiabilidade operacional.", valC:"Estabilidade melhorada.",
+    deps:["C04"], aviso:null, group:"coreflow" },
+
+  { id:"C37", name:"Integration Layer Single BaaS", cat:"Integração BaaS", origem:"CoreFlow", canais:["Todos"],
+    status:"dev", ia:"hab-ia",
+    iaSug:"Abstração para agentes chamarem serviços financeiros.",
+    desc:"Conector padronizado para um BaaS/core. Base da orquestração.",
+    valD:"Reduz custo de integração.", valC:"Experiência mais consistente.",
+    deps:[],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+
+  // ── POTENCIALIZAÇÃO IA ──
+  { id:"C16", name:"Extrato Inteligente", cat:"IA e Dados", origem:"Canal+IA+BaaS", canais:["App","IB","Lia"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Perguntas como 'quantos PIX fiz hoje?', categorização, previsão de boletos.",
+    desc:"Interpretação do passado, presente e futuro financeiro via linguagem natural.",
+    valD:"Diferencia oferta com inteligência contextual.", valC:"Entendimento do seu dinheiro.",
+    deps:["C15","C04","C31"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
+
+  { id:"POT02", name:"Limites Inteligentes", cat:"IA e Dados", origem:"CoreFlow", canais:["WA","App"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Autoajuste de limites por comportamento e perfil de risco.",
+    desc:"Sugestão automática e ajuste de limites baseados em padrões do correntista.",
+    valD:"Mitiga fraude com menos fricção.", valC:"Limites mais adequados ao perfil.",
+    deps:["C28","C31","C04"], aviso:null, group:"potencia" },
+
+  { id:"POT03", name:"WA Copiloto", cat:"IA e Operação", origem:"CoreFlow", canais:["WA"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Assistente para operação e administração bancária.",
+    desc:"Copiloto IA para o Web Admin: sugestão de regras, alertas operacionais.",
+    valD:"Escala operação sem crescer equipe.", valC:"Indireto: mais estabilidade.",
+    deps:["C03","C04","C29"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
+
+  { id:"POT04", name:"Gestão de Cobranças Inteligente", cat:"Pagamentos, Boletos e Cobranças", origem:"Ambos", canais:["App","IB"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Sugestão de follow-up, antecipação de recebíveis, gestão recorrente.",
+    desc:"IA para gerenciamento inteligente de cobranças e recebíveis.",
+    valD:"Aumenta conversão de cobranças.", valC:"Gestão automatizada de receber.",
+    deps:["C24","C04"], aviso:null, group:"potencia" },
+
+  { id:"POT05", name:"Módulo Campaign Inteligente", cat:"IA + Experiência", origem:"Canal", canais:["App","IB","WA"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Campanhas com audiência selecionada por IA por parâmetros de comportamento.",
+    desc:"Criação de campanhas Push, E-mail e SMS com audiências sugeridas pela IA.",
+    valD:"Fidelização da base.", valC:"Aumenta engajamento.",
+    deps:["C04","C08"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
+
+  // ── SOLUÇÕES IA PURAS ──
+  { id:"C34", name:"Lia", cat:"IA e Experiência", origem:"IA+CoreFlow", canais:["Lia","App"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Avatar/assistente com PIX assistido, logs visuais e contexto controlado.",
+    desc:"Assistente IA/avatar conversacional para correntistas. Vitrine Febraban Tech.",
+    valD:"Atrai CEO/CIO/CMO e demonstra competência IA.", valC:"Interação conversacional diferenciada.",
+    deps:["C04","C18","C08","C30","C35","C14"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes",
+    liaDetail: true },
+
+  { id:"C31", name:"AI Layer Essencial", cat:"IA", origem:"CoreFlow", canais:["Todos"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Detecção de anomalias, sugestão de regras e limites.",
+    desc:"Camada inicial de inteligência. Fundação para todas as capacidades IA.",
+    valD:"Diferencial competitivo com segurança.", valC:"Melhora experiência e proteção.",
+    deps:["C04","C29"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+
+  { id:"C32", name:"AI Layer Advanced / Copiloto Operacional", cat:"IA", origem:"CoreFlow", canais:["WA","Operação"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Copiloto para operação, regras, alertas e decisões assistidas.",
+    desc:"Automação e inteligência operacional avançada.",
+    valD:"Escala operação sem crescer equipe.", valC:"Indireto ao correntista.",
+    deps:["C04","C31","C29"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+
+  { id:"C30", name:"Logs Auditáveis para IA", cat:"Segurança, IA e Observabilidade", origem:"CoreFlow", canais:["Lia","WA","Operação"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Mostrar visualmente o que a IA recebeu, decidiu, acionou e retornou.",
+    desc:"Logs técnicos e visuais para confiança em IA. Must-have Febraban Tech.",
+    valD:"Vende segurança e governança.", valC:"Aumenta confiança no atendimento IA.",
+    deps:["C29","C04"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+
+  { id:"C33", name:"MCP / Camada de Contexto", cat:"IA e Integrações", origem:"CoreFlow", canais:["Lia","App","WA","API"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Conector padronizado para dados, ferramentas e sistemas externos.",
+    desc:"Camada de contexto para agentes IA. Padroniza integrações N×M.",
+    valD:"Padroniza integrações IA e reduz custo.", valC:"Respostas e ações melhores.",
+    deps:["C04"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+
+  { id:"C39", name:"ZDR / Zero Data Retention", cat:"Segurança e IA", origem:"Política", canais:["Lia","IA","Operação"],
+    status:"dev", ia:"ia-pure",
+    iaSug:"Política de não retenção/minimização de dados sensíveis em IA.",
+    desc:"Princípio de segurança e privacidade. Não retém dados sensíveis em provedores IA.",
+    valD:"Reduz risco reputacional e regulatório.", valC:"Protege dados do correntista.",
+    deps:[], aviso:null, group:"iasolucoes" },
+
+  // ── BACKLOG ──
+  { id:"BL01", name:"PIX MED", cat:"PIX e Transferências", origem:"BaaS", canais:["App","IB"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Detecção de transações suspeitas.",
+    desc:"Autoatendimento e visão integrada de MED (Mecanismo Especial de Devolução).",
+    valD:"Compliance regulatório e redução de fraudes.", valC:"Devolução simplificada.",
+    deps:["C18"], aviso:null, group:"backlog" },
+
+  { id:"BL02", name:"PIX Automático", cat:"PIX e Transferências", origem:"BaaS", canais:["App"],
+    status:"dev", ia:"ia-plus",
+    iaSug:"Alertas e detecção de anomalias em cobranças recorrentes.",
+    desc:"Cobranças recorrentes via CPF. Debitado automaticamente em conta.",
+    valD:"Nova modalidade de pagamento recorrente.", valC:"Pagamentos automáticos sem ação manual.",
+    deps:["C18","C08"], aviso:null, group:"backlog" },
+
+  { id:"BL03", name:"Transferência V2", cat:"PIX e Transferências", origem:"Ambos", canais:["App","IB"],
+    status:"backlog", ia:"ia-plus",
+    iaSug:"Sugestão de melhor rota (custo/tempo).",
+    desc:"Unificação PIX, TED e transferência interna com agenda de contatos.",
+    valD:"Produto unificado e diferenciado.", valC:"Experiência simplificada de transferência.",
+    deps:["C18","C20","C26"], aviso:null, group:"backlog" },
+
+  { id:"BL04", name:"Limite PIX por Contato", cat:"Limites, Alçadas e Aprovações", origem:"BaaS", canais:["App"],
+    status:"backlog", ia:"ia-plus",
+    iaSug:"Autoajuste inteligente de limite por perfil de contato.",
+    desc:"Limite de PIX configurável por lista de contato.",
+    valD:"Granularidade de controle de risco.", valC:"Segurança personalizada.",
+    deps:["C28","C26"], aviso:null, group:"backlog" },
+
+  { id:"BL05", name:"Login IB e WA com App", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App","IB","WA"],
+    status:"backlog", ia:"ia-plus",
+    iaSug:"Análise de risco no login cruzado de canais.",
+    desc:"Autenticação unificada do App para IB e WA Web Admin.",
+    valD:"Reduz fricção e reforça segurança.", valC:"Login único e seguro.",
+    deps:["C08","C09"], aviso:null, group:"backlog" },
+
+  { id:"BL06", name:"Cartões de Crédito", cat:"Conta e Transações", origem:"BaaS", canais:["App","IB"],
+    status:"backlog", ia:"ia-pure",
+    iaSug:"Auto-gestão e integração inteligente de cartões.",
+    desc:"Gestão de cartões de crédito integrada ao canal digital.",
+    valD:"Expansão do portfólio financeiro.", valC:"Controle de cartão no app.",
+    deps:["C08","C14"], aviso:null, group:"backlog" },
+
+  { id:"BL07", name:"Integration Layer Multi BaaS", cat:"Integração BaaS", origem:"CoreFlow", canais:["Todos"],
+    status:"backlog", ia:"ia-plus",
+    iaSug:"Agentes e canais independentes de provedor.",
+    desc:"Capacidade de operar múltiplos cores/BaaS. Reduz lock-in.",
+    valD:"Reduz lock-in e retrabalho.", valC:"Menor impacto de troca de fornecedor.",
+    deps:["C37"], aviso:null, group:"backlog" },
+];
+
+// ── ID lookup ──
+const byId = {};
+CARDS.forEach(c => byId[c.id] = c);
+
+// ── Cascade deps ──
+function getCascadeDeps(startId) {
+  const visited = new Set();
+  const queue = [startId];
+  while (queue.length) {
+    const id = queue.pop();
+    if (visited.has(id)) continue;
+    visited.add(id);
+    const card = byId[id];
+    if (!card) continue;
+    (card.deps || []).forEach(d => { if (!visited.has(d)) queue.push(d); });
+  }
+  return visited;
+}
+
+
+
+
+
+
+
+
+
+// ── Which groups to show per view, and which extra dep-only cards to pull ──
+const VIEW_GROUPS = {
+  todos:      ['produto','coreflow','potencia','iasolucoes','backlog'],
+  produto:    ['produto'],
+  backlog:    ['backlog'],
+  potencia:   ['potencia'],
+  iasolucoes: ['iasolucoes'],
+  coreflow:   ['coreflow'],
+};
+
+// Build view: primary cards + context-dep cards
+function buildViewCards(view) {
+  const groups = VIEW_GROUPS[view] || ['produto'];
+  const primaryIds = new Set(CARDS.filter(c => groups.includes(c.group)).map(c => c.id));
+  const contextIds = new Set();
+
+  primaryIds.forEach(id => {
+    const cascade = getCascadeDeps(id);
+    cascade.delete(id);
+    cascade.forEach(dep => {
+      if (!primaryIds.has(dep) && byId[dep]) contextIds.add(dep);
+    });
+  });
+
+  // Order: primary first, then context
+  const primaryCards = CARDS.filter(c => primaryIds.has(c.id));
+  const contextCards = CARDS.filter(c => contextIds.has(c.id));
+
+  return { primaryCards, contextCards, primaryIds, contextIds };
+}
+
+// ── State ──
+let currentView = 'todos';
+let selectedId = null;
+let searchText = '';
+let filterOrigem = '';
+let filterIA = '';
+
+// ── Render ──
+function getAccent(card) {
+  if (card.ia === 'ia-pure') return 'linear-gradient(90deg,var(--purple2),var(--violet))';
+  if (card.origem && card.origem.includes('CoreFlow')) return 'linear-gradient(90deg,var(--cyan),var(--blue))';
+  if (card.ia === 'hab-ia') return 'linear-gradient(90deg,var(--cyan2),var(--cf-color))';
+  if (card.ia === 'ia-plus') return 'linear-gradient(90deg,var(--blue),var(--blue2))';
+  if (card.cat && card.cat.includes('Segurança')) return 'linear-gradient(90deg,var(--red2),var(--orange))';
+  if (card.origem === 'BaaS') return 'linear-gradient(90deg,var(--gray),var(--gray2))';
+  return 'linear-gradient(90deg,var(--border2),var(--border))';
+}
+function getOrigemDot(card) {
+  if (card.ia === 'ia-pure') return 'var(--purple2)';
+  if (card.origem && card.origem.includes('CoreFlow')) return 'var(--cf-color)';
+  if (card.origem === 'Canal') return '#94a3b8';
+  if (card.origem === 'BaaS') return '#64748b';
+  if (card.ia === 'ia-plus') return 'var(--blue)';
+  return '#374151';
+}
+function getIABadge(ia) {
+  const m = { 'ia-pure':['IA Pura','b-ia-pure'], 'ia-plus':['Potencial IA','b-ia-plus'],
+               'hab-ia':['Habilitador IA','b-hab-ia'], 'sem-ia':['Sem IA','b-sem-ia'] };
+  return m[ia] || ['Sem IA','b-sem-ia'];
+}
+function getStatusBadge(s) {
+  const m = { 'exists':['Existente','b-exists'], 'dev':['Em Dev','b-dev'], 'backlog':['Backlog','b-backlog'] };
+  return m[s] || [s,'b-exists'];
+}
+
+function cardHTML(card, isCtx) {
+  const [iaLabel, iaCls] = getIABadge(card.ia);
+  const [stLabel, stCls] = getStatusBadge(card.status);
+  const accent = getAccent(card);
+  const dot = getOrigemDot(card);
+
+  let cls = 'card';
+  if (card.ia === 'ia-pure') cls += ' ia-pure';
+  else if (card.ia === 'ia-plus') cls += ' ia-plus';
+  if (card.status === 'backlog') cls += ' backlog-card';
+  if (card.grupo === 'coreflow' || (card.origem && card.origem.includes('CoreFlow') && card.group === 'coreflow')) cls += ' cf-card';
+  if (isCtx) cls += ' ctx-dep';
+
+  return `<div class="${cls}" id="card-${card.id}" data-id="${card.id}" onclick="selectCard('${card.id}')">
+    <div class="card-accent" style="background:${accent}"></div>
+    ${card.ia==='ia-pure'?'<div class="ia-glow-ring"></div>':''}
+    ${card.ia==='ia-plus'?'<div class="ia-plus-ring"></div>':''}
+    <div class="card-top">
+      <div class="card-name">${card.name}</div>
+      <div class="badges">
+        <span class="badge ${iaCls}">${iaLabel}</span>
+        <span class="badge ${stCls}">${stLabel}</span>
+        ${isCtx ? '<span class="badge b-ctx">Dependência</span>' : ''}
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="meta-dot" style="background:${dot}"></div>
+      <span>${card.cat}</span>
+    </div>
+    <div class="card-desc">${card.desc}</div>
+    ${card.aviso ? `<div class="card-warning">⚠ ${card.aviso}</div>` : ''}
+  </div>`;
+}
+
+function groupLabel(group) {
+  const m = {
+    produto:'Produto Base', coreflow:'CoreFlow', potencia:'Potencialização IA',
+    iasolucoes:'Soluções IA', backlog:'Backlog',
+  };
+  return m[group] || group;
+}
+function groupColor(group) {
+  const m = {
+    produto:'var(--text3)', coreflow:'var(--cf-color)', potencia:'var(--blue2)',
+    iasolucoes:'var(--purple3)', backlog:'var(--amber)',
+  };
+  return m[group] || 'var(--text3)';
+}
+
+function renderMosaic() {
+  const { primaryCards, contextCards, primaryIds, contextIds } = buildViewCards(currentView);
+
+  // Apply search/filter on top
+  function passesFilter(c) {
+    if (searchText) {
+      const s = searchText.toLowerCase();
+      if (!(c.name.toLowerCase().includes(s) ||
+            c.desc.toLowerCase().includes(s) ||
+            c.cat.toLowerCase().includes(s) ||
+            (c.iaSug && c.iaSug.toLowerCase().includes(s)))) return false;
+    }
+    if (filterOrigem && !c.origem.toLowerCase().includes(filterOrigem.toLowerCase())) return false;
+    if (filterIA && c.ia !== filterIA) return false;
+    return true;
+  }
+
+  const filtPrimary = primaryCards.filter(passesFilter);
+  const filtContext = contextCards.filter(passesFilter);
+
+  // Update nav counts
+  const allGroups = ['todos','produto','backlog','potencia','iasolucoes','coreflow'];
+  allGroups.forEach(v => {
+    const el = document.getElementById('cnt-' + v);
+    if (!el) return;
+    if (v === 'todos') { el.textContent = CARDS.length; return; }
+    el.textContent = CARDS.filter(c => VIEW_GROUPS[v].includes(c.group)).length;
+  });
+
+  let html = '';
+
+  if (currentView === 'todos') {
+    // Group by group
+    const groups = ['produto','coreflow','potencia','iasolucoes','backlog'];
+    groups.forEach(grp => {
+      const gc = filtPrimary.filter(c => c.group === grp);
+      if (!gc.length) return;
+      html += `<div class="section-divider">
+        <div class="section-divider-label" style="color:${groupColor(grp)}">
+          <span style="width:6px;height:6px;border-radius:50%;background:${groupColor(grp)};display:inline-block"></span>
+          ${groupLabel(grp)}
+        </div>
+        <div class="section-divider-line"></div>
+        <div class="section-divider-count">${gc.length}</div>
+      </div>
+      <div class="mosaic" style="margin-bottom:4px">
+        ${gc.map(c => cardHTML(c, false)).join('')}
+      </div>`;
+    });
+  } else {
+    // Primary cards
+    if (filtPrimary.length) {
+      html += `<div class="section-divider">
+        <div class="section-divider-label" style="color:${groupColor(currentView)}">
+          <span style="width:6px;height:6px;border-radius:50%;background:${groupColor(currentView)};display:inline-block"></span>
+          ${groupLabel(currentView)}
+        </div>
+        <div class="section-divider-line"></div>
+        <div class="section-divider-count">${filtPrimary.length}</div>
+      </div>
+      <div class="mosaic" style="margin-bottom:4px">
+        ${filtPrimary.map(c => cardHTML(c, false)).join('')}
+      </div>`;
+    }
+    // Context dep cards
+    if (filtContext.length) {
+      // Group context by their original group
+      const ctxGroups = {};
+      filtContext.forEach(c => {
+        if (!ctxGroups[c.group]) ctxGroups[c.group] = [];
+        ctxGroups[c.group].push(c);
+      });
+      Object.entries(ctxGroups).forEach(([grp, cards]) => {
+        html += `<div class="section-divider">
+          <div class="section-divider-label" style="color:var(--text3)">
+            <span style="width:6px;height:6px;border-radius:50%;background:rgba(100,116,139,0.5);border:1px dashed #546480;display:inline-block"></span>
+            Dependências de contexto — ${groupLabel(grp)}
+          </div>
+          <div class="section-divider-line"></div>
+          <div class="section-divider-count">${cards.length}</div>
+        </div>
+        <div class="mosaic" style="margin-bottom:4px">
+          ${cards.map(c => cardHTML(c, true)).join('')}
+        </div>`;
+      });
+    }
+    if (!filtPrimary.length && !filtContext.length) {
+      html = '<div style="color:var(--text3);font-size:12px;padding:24px;text-align:center;">Nenhum card encontrado.</div>';
+    }
+  }
+
+  document.getElementById('mosaicContainer').innerHTML = html;
+  reapplySelection();
+}
+
+// ── Selection / dep highlight ──
+function selectCard(id) {
+  if (selectedId === id) { clearSelection(); return; }
+  selectedId = id;
+  reapplySelection();
+  const card = byId[id];
+  if (card) openPanel(card);
+}
+
+function reapplySelection() {
+  if (!selectedId) return;
+  const cascadeDeps = getCascadeDeps(selectedId);
+  cascadeDeps.delete(selectedId);
+
+  document.querySelectorAll('.card[data-id]').forEach(el => {
+    const cid = el.dataset.id;
+    el.classList.remove('dep-of','dep-by','selected','dimmed');
+    if (cid === selectedId) { el.classList.add('selected'); return; }
+    if (cascadeDeps.has(cid)) { el.classList.add('dep-of'); return; }
+    // check if cid depends on selectedId
+    const otherCascade = getCascadeDeps(cid);
+    if (otherCascade.has(selectedId)) { el.classList.add('dep-by'); return; }
+    el.classList.add('dimmed');
+  });
+  document.getElementById('depBar').classList.add('visible');
+}
+
+function clearSelection() {
+  selectedId = null;
+  document.querySelectorAll('.card').forEach(el => {
+    el.classList.remove('dep-of','dep-by','selected','dimmed');
+  });
+  document.getElementById('depBar').classList.remove('visible');
+  closePanel();
+}
+
+// ── Panel ──
+function openPanel(card) {
+  if (card.liaDetail) {
+    renderLiaPanel();
+  } else {
+    renderCardPanel(card);
+  }
+  document.getElementById('sidePanel').classList.add('open');
+}
+
+function renderCardPanel(card) {
+  const [iaLabel, iaCls] = getIABadge(card.ia);
+  const [stLabel, stCls] = getStatusBadge(card.status);
+  const depCards = (card.deps || []).map(d => byId[d]).filter(Boolean);
+  const reqBy = CARDS.filter(c => (c.deps || []).includes(card.id));
+
+  document.getElementById('panelContent').innerHTML = `
+    <div class="panel-id">${card.id}</div>
+    <div class="panel-name">${card.name}</div>
+    <div class="panel-badges">
+      <span class="badge ${iaCls}">${iaLabel}</span>
+      <span class="badge ${stCls}">${stLabel}</span>
+      <span class="badge b-sem-ia">${card.origem}</span>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="ps"><div class="ps-title">Descrição</div><div class="ps-body">${card.desc}</div></div>
+
+    ${card.valD ? `<div class="ps"><div class="ps-title">Valor para Diletta</div><div class="ps-body">${card.valD}</div></div>` : ''}
+    ${card.valC ? `<div class="ps"><div class="ps-title">Valor para Correntista</div><div class="ps-body">${card.valC}</div></div>` : ''}
+
+    ${card.iaSug ? `<div class="ps"><div class="ps-title">Sugestão IA</div>
+      <div class="${card.ia==='ia-pure'?'ia-box':'ia-box plus'}">${card.iaSug}</div></div>` : ''}
+
+    ${card.aviso ? `<div class="ps"><div class="ps-title">⚠ Aviso Técnico</div>
+      <div style="font-size:10px;color:var(--orange);padding:5px 7px;border-radius:4px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2)">${card.aviso}</div></div>` : ''}
+
+    ${depCards.length ? `<div class="ps"><div class="ps-title">🔴 Depende de (${depCards.length})</div>
+      <div class="dep-list">${depCards.map(d=>`
+        <div class="dep-item" onclick="selectCard('${d.id}')">
+          <span class="dep-arr">→</span>
+          <span class="dep-id">${d.id}</span>
+          <span>${d.name}</span>
+        </div>`).join('')}</div></div>` : ''}
+
+    ${reqBy.length ? `<div class="ps"><div class="ps-title">🔵 Usado por (${reqBy.length})</div>
+      <div class="dep-list">${reqBy.map(d=>`
+        <div class="dep-item" onclick="selectCard('${d.id}')">
+          <span class="dep-arr">←</span>
+          <span class="dep-id">${d.id}</span>
+          <span>${d.name}</span>
+        </div>`).join('')}</div></div>` : ''}
+
+    ${card.canais && card.canais.length ? `<div class="ps"><div class="ps-title">Canais</div>
+      <div class="chan-tags">${card.canais.map(c=>`<span class="chan-tag">${c}</span>`).join('')}</div></div>` : ''}
+  `;
+}
+
+function renderLiaPanel() {
+  document.getElementById('panelContent').innerHTML = `
+    <div class="panel-id">C34</div>
+    <div class="panel-name" style="color:var(--purple3)">Lia — Assistente de IA</div>
+    <div class="panel-badges">
+      <span class="badge b-ia-pure">IA Pura</span>
+      <span class="badge b-dev">Experimental</span>
+      <span class="badge" style="background:rgba(249,115,22,0.12);color:var(--orange);border:1px solid rgba(249,115,22,0.25)">Vitrine Feira</span>
+    </div>
+
+    <div style="height:8px"></div>
+
+    <div class="ps">
+      <div class="ps-title">Descrição</div>
+      <div class="ps-body">Avatar/assistente conversacional para demonstração executiva e interação com correntistas, com foco em PIX fim a fim, autenticação, logs visuais, segurança e experiência AI Ready.</div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">Objetivo</div>
+      <div class="ps-body">Atrair CEOs, CIOs, CMOs e executivos na Febraban Tech, demonstrando uma experiência bancária com IA que também revela a camada técnica e de segurança por trás.</div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">🔴 Must-have</div>
+      <div class="must-have-list">
+        ${['PIX fim a fim','Autenticação','Logs visuais e auditáveis','Segurança transacional','Visualização do "cérebro" / processamento da IA','Resposta contextual dentro de escopo','Demonstração em tela vertical / formato retrato']
+          .map(i=>`<div class="mh-item"><span class="mh-dot-req">●</span>${i}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">🟡 Nice-to-have</div>
+      <div class="must-have-list">
+        ${['Consulta de saldo','Consulta de extrato','Extrato inteligente','Lista de contatos','Avatar customizável','Antecipação de recebíveis mockada','Integração futura com videochamada']
+          .map(i=>`<div class="mh-item"><span class="mh-dot-nice">◦</span><span style="color:var(--text3)">${i}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">Jornada Demo</div>
+      <div class="journey-steps">
+        ${[
+          'Visitante interage por voz ou texto',
+          'Lia interpreta intenção',
+          'Sistema valida contexto e escopo',
+          'Usuário autentica',
+          'Lia aciona serviço PIX',
+          'Logs mostram bastidores da transação',
+          'Lia retorna resposta final ao usuário',
+        ].map((s,i)=>`<div class="j-step"><span class="j-num">${i+1}</span><span>${s}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">🔴 Dependências obrigatórias</div>
+      <div class="dep-list">
+        ${['C04','C08','C18','C14','C35','C30','C29'].map(id=>{
+          const c = byId[id];
+          if(!c) return '';
+          return `<div class="dep-item" onclick="selectCard('${c.id}')">
+            <span class="dep-arr">→</span>
+            <span class="dep-id">${c.id}</span>
+            <span>${c.name}</span>
+          </div>`;
+        }).join('')}
+        <div class="mh-item" style="padding:3px 7px"><span class="mh-dot-req">●</span><span style="font-size:10px">BaaS PIX</span></div>
+      </div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">⚠ Limitações</div>
+      <div style="font-size:10px;color:var(--text3);line-height:1.5">
+        Não é produto final completo. Não cobre todos os serviços bancários. Não deve prometer funcionalidades não implementadas. Depende de desacoplamento e estabilidade do backend. Precisa de segurança contra execução fora de escopo.
+      </div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">Mensagem Executiva</div>
+      <div class="lia-exec-msg">"Lia é a vitrine de IA. CoreFlow é a camada que permite executar com segurança, contexto e orquestração."</div>
+    </div>
+
+    <div class="ps">
+      <div class="ps-title">⚠ Aviso Técnico</div>
+      <div style="font-size:10px;color:var(--orange);padding:5px 7px;border-radius:4px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2)">Depende de desacoplamento do backend (em construção)</div>
+    </div>
+  `;
+}
+
+function closePanel() {
+  document.getElementById('sidePanel').classList.remove('open');
+}
+
+// ── Nav ──
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('ntab-' + v)?.classList.add('active');
+  clearSelection();
+  renderMosaic();
+}
+
+// ── Search / Filter ──
+function applySearch() {
+  searchText = document.getElementById('searchInput').value;
+  filterOrigem = document.getElementById('filterOrigem').value;
+  filterIA = document.getElementById('filterIA').value;
+  renderMosaic();
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterOrigem').value = '';
+  document.getElementById('filterIA').value = '';
+  searchText = ''; filterOrigem = ''; filterIA = '';
+  renderMosaic();
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => { renderMosaic(); });
+</script>
+</body>
+</html>
