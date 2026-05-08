@@ -433,13 +433,13 @@ body {
     Todos <span class="nav-badge" id="cnt-todos">0</span>
   </div>
   <div class="nav-tab" id="ntab-produto" onclick="setView('produto')">
-    Produto Base <span class="nav-badge" id="cnt-produto">0</span>
+    Solução Base <span class="nav-badge" id="cnt-produto">0</span>
   </div>
   <div class="nav-tab" id="ntab-backlog" onclick="setView('backlog')">
     Backlog <span class="nav-badge" id="cnt-backlog">0</span>
   </div>
   <div class="nav-tab" id="ntab-potencia" onclick="setView('potencia')">
-    Potencialização IA <span class="nav-badge" id="cnt-potencia">0</span>
+    Potencialização IA - Novas Soluções <span class="nav-badge" id="cnt-potencia">0</span>
   </div>
   <div class="nav-tab" id="ntab-iasolucoes" onclick="setView('iasolucoes')">
     Soluções IA <span class="nav-badge" id="cnt-iasolucoes">0</span>
@@ -661,6 +661,23 @@ const CARDS = [
     deps:["C05"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
 
+
+  // ── NOVAS FEATURES ──
+  { id:"C40", name:"Gestão de Tarifas e Cobranças Recorrentes", cat:"Financeiro e Tarifas", origem:"Ambos", canais:["App","IB","WA"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Tarifas inteligentes e recomendação para economia do usuário ou aumento de rentabilidade do administrador.",
+    desc:"Gestão e configuração de tarifas, cobranças recorrentes e modelos de precificação da conta.",
+    valD:"Monetização flexível e inteligente da plataforma.", valC:"Transparência e economia em tarifas.",
+    deps:["C05","C07","C14","C15","C18","C21","C20"],
+    aviso:null, group:"produto" },
+
+  { id:"C41", name:"Alçadas e Aprovação", cat:"Limites, Alçadas e Aprovações", origem:"Canal", canais:["App","IB","WA"],
+    status:"exists", ia:"ia-plus",
+    iaSug:"Identificação e modelos de aprovação mais inteligentes com sugestões para o administrador ou usuário, modelos de comunicação.",
+    desc:"Fluxos de alçada e aprovação para operações críticas. Governança transacional e operacional.",
+    valD:"Controle granular de risco e compliance.", valC:"Segurança e rastreabilidade nas aprovações.",
+    deps:["C05","C07","C14","C15","C18","C21","C20"],
+    aviso:null, group:"produto" },
   // ── COREFLOW modules (shown in produto + coreflow views) ──
   { id:"C04", name:"CoreFlow", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia","API"],
     status:"dev", ia:"hab-ia",
@@ -676,7 +693,7 @@ const CARDS = [
     desc:"Backend for Frontend modular. Abstrai complexidade dos BaaS.",
     valD:"Reduz acoplamento e variação por provedor.", valC:"Respostas mais consistentes.",
     deps:["C08"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
 
   { id:"C07", name:"Business Engine", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia"],
     status:"dev", ia:"ia-plus",
@@ -684,7 +701,7 @@ const CARDS = [
     desc:"Motor configurável para regras, limites, alçadas e workflows.",
     valD:"Vende parametrização e flexibilidade.", valC:"Regras mais consistentes.",
     deps:["C05"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
 
   { id:"C29", name:"Observabilidade Base", cat:"Segurança, Auditoria e Observabilidade", origem:"CoreFlow", canais:["Todos"],
     status:"dev", ia:"hab-ia",
@@ -971,7 +988,7 @@ function cardHTML(card, isCtx) {
 
 function groupLabel(group) {
   const m = {
-    produto:'Produto Base', coreflow:'CoreFlow', potencia:'Potencialização IA',
+    produto:'Solução Base', coreflow:'CoreFlow', potencia:'Potencialização IA - Novas Soluções',
     iasolucoes:'Soluções IA', backlog:'Backlog',
   };
   return m[group] || group;
