@@ -200,12 +200,19 @@ body {
   border-color: var(--blue2) !important;
   box-shadow: 0 0 0 1px var(--blue2), 0 0 8px rgba(78,155,255,0.2) !important;
 }
-.card.dimmed { opacity: .28; }
-.card.backlog-card.dimmed { opacity: .18; border-style: dashed; }
-.card.ia-pure.dimmed { opacity: .18; }
-.card.ia-plus.dimmed { opacity: .18; }
-.card.cf-card.dimmed { opacity: .18; }
-.card.ctx-dep.dimmed { opacity: .12; }
+.card.dimmed { opacity: .22 !important; filter: saturate(0.25); }
+.card.backlog-card.dimmed { opacity: .18 !important; border-style: dashed; }
+.card.ia-pure.dimmed { opacity: .18 !important; }
+.card.ia-plus.dimmed { opacity: .18 !important; }
+.card.cf-card.dimmed { opacity: .18 !important; }
+.card.ctx-dep.dimmed { opacity: .12 !important; }
+.card.dimmed:hover {
+  opacity: .38 !important;
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
 
 /* IA / CoreFlow card flavors */
 .card.ia-pure {
@@ -379,6 +386,52 @@ body {
   border: 1px solid var(--border2); border-radius: 3px;
   padding: 1px 5px; font-size: 9px;
 }
+
+.card.dep-nice{border-style:dashed!important;border-color:var(--orange)!important;box-shadow:0 0 8px rgba(249,115,22,.15)!important;}
+.card.dep-future{border-style:dashed!important;border-color:#1e40af!important;box-shadow:0 0 8px rgba(30,64,175,.2)!important;}
+.card.dep-nice.backlog-card,.card.dep-future.backlog-card{opacity:.9;}
+.cf-mcp-line{width:2px;height:18px;background:linear-gradient(to bottom,var(--purple2),transparent);border-radius:1px;margin:2px 0 0 14px;}
+.cf-mcp-top{display:flex;align-items:center;gap:5px;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid rgba(168,85,247,.2);}
+.cf-mcp-top-line{width:2px;height:14px;background:linear-gradient(to top,var(--purple2),transparent);border-radius:1px;flex-shrink:0;}
+.cf-mcp-top-label{font-size:8px;color:var(--purple3);opacity:0.7;font-family:"DM Mono",monospace;}
+.card-fair-tag{margin-top:4px;padding:2px 5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.5);border-radius:3px;font-size:8px;color:#fff;font-weight:600;}
+.card-ai-layer-tag{margin-top:4px;padding:2px 5px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.35);border-radius:3px;font-size:8px;color:var(--purple3);font-weight:600;}
+.card-zdr-tag{margin-top:4px;padding:2px 5px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.28);border-radius:3px;font-size:8px;color:var(--purple3);}
+.card-bff-tag{margin-top:4px;padding:2px 5px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.28);border-radius:3px;font-size:8px;color:#93c5fd;}
+
+/* CoreFlow + MCP paired unit */
+.cf-mcp-pair {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  grid-column: span 2;
+}
+.cf-mcp-pair .card {
+  flex: 1;
+}
+.cf-mcp-connector-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+  gap: 3px;
+}
+.cf-mcp-connector-bar .conn-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--purple2);
+  box-shadow: 0 0 6px rgba(168,85,247,0.5);
+}
+.cf-mcp-connector-bar .conn-line {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--purple2), var(--purple2));
+  border-radius: 1px;
+  box-shadow: 0 0 4px rgba(168,85,247,0.3);
+  min-height: 20px;
+}
 </style>
 </head>
 <body>
@@ -455,7 +508,15 @@ body {
   <span style="font-weight:600;color:var(--text2)">Dependências:</span>
   <div class="dep-bar-item">
     <div class="dep-bar-box" style="background:rgba(249,115,22,0.12);border-color:var(--orange)"></div>
-    Este card depende de…
+    Depende de…
+  </div>
+  <div class="dep-bar-item">
+    <div class="dep-bar-box" style="background:rgba(249,115,22,0.06);border-color:var(--orange);border-style:dashed"></div>
+    Nice to Have
+  </div>
+  <div class="dep-bar-item">
+    <div class="dep-bar-box" style="background:rgba(30,64,175,0.1);border-color:#1e40af;border-style:dashed"></div>
+    Implementação Futura
   </div>
   <div class="dep-bar-item">
     <div class="dep-bar-box" style="background:rgba(78,155,255,0.12);border-color:var(--blue2)"></div>
@@ -490,177 +551,177 @@ const CARDS = [
     iaSug:"Atalhos inteligentes, hiperpersonalização de menus, assistente no canal.",
     desc:"Canal digital mobile para saldo, extrato, PIX, pagamentos, perfil e notificações.",
     valD:"Canal financeiro white-label sobre BaaS.", valC:"Experiência digital de operação da conta.",
-    deps:["C08","C05"], aviso:null, group:"produto" },
+    deps:["C08","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C02", name:"Internet Banking", userChannel:true, cat:"Experiência e Canais", origem:"Canal", canais:["IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Busca inteligente, extrato inteligente e copiloto para operações PJ.",
     desc:"Canal web do correntista para operações financeiras e consultas.",
     valD:"Amplia portfólio de canal e atende PJ.", valC:"Operação financeira web.",
-    deps:["C08","C05"], aviso:null, group:"produto" },
+    deps:["C08","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C03", name:"WA Web Admin", userChannel:true, waBacklog:true, cat:"Experiência e Canais", origem:"Canal", canais:["WA"],
     status:"exists", ia:"ia-plus",
     iaSug:"Copiloto operacional para sugerir regras, detectar anomalias e orientar admins.",
     desc:"Console do administrador do banco/cliente Diletta.",
     valD:"Governança e controle operacional.", valC:"Indireto; melhora gestão.",
-    deps:["C08","C07"], aviso:null, group:"produto" },
+    deps:["C08","C07","C42"], aviso:null, group:"produto" },
 
   { id:"C08", name:"Autenticação e Gestão de Sessão", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App","IB","Lia"],
     status:"exists", ia:"ia-plus",
     iaSug:"Análise de risco contextual para step-up auth. Anomalias de login.",
     desc:"Controle de login, sessão, PIN e contexto autenticado. Pré-requisito para qualquer transação.",
     valD:"Pré-requisito para qualquer transação segura.", valC:"Acesso seguro.",
-    deps:["C05"], aviso:null, group:"produto" },
+    deps:["C05","C42"], aviso:null, group:"produto" },
 
   { id:"C09", name:"Device Pairing", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Sinal de risco para detecção de comportamento anômalo.",
     desc:"Vinculação segura entre usuário, dispositivo e canal.",
     valD:"Reduz fraude, aumenta segurança.", valC:"Confiança no uso mobile.",
-    deps:["C08","C05"], aviso:null, group:"produto" },
+    deps:["C08","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C10", name:"Biometria", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App"],
     status:"exists", ia:"sem-ia",
     iaSug:null,
     desc:"Autenticação biométrica no mobile.",
     valD:"Melhora segurança percebida.", valC:"Facilita autenticação.",
-    deps:["C08","C05"], aviso:null, group:"produto" },
+    deps:["C08","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C11", name:"Onboarding PF", cat:"Onboarding e Cadastro", origem:"BaaS", canais:["App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Onboarding assistido, coleta guiada e OCR para simplificação.",
     desc:"Cadastro de conta pessoa física. Padronização e independência de BaaS em andamento.",
     valD:"Acelera ativação do cliente final.", valC:"Permite abertura de conta.",
-    deps:["C13","C05"], aviso:null, group:"produto" },
+    deps:["C13","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C12", name:"Onboarding PJ", cat:"Onboarding e Cadastro", origem:"Canal", canais:["App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Assistente para documentação PJ. OCR e leitura inteligente de contrato social.",
     desc:"Cadastro de conta pessoa jurídica. Em revisão para qualidade.",
     valD:"Suporta PJ e estruturas empresariais.", valC:"Facilita entrada de empresas.",
-    deps:["C13","C05"], aviso:null, group:"produto" },
+    deps:["C13","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C13", name:"KYC e Antifraude", cat:"Segurança", origem:"BaaS", canais:["App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Detecção de anomalias, score de risco, Facematch e Liveness com IA.",
     desc:"Validação de identidade, documentos e risco.",
     valD:"Reduz risco de fraude e compliance.", valC:"Proteção ao correntista.",
-    deps:["C05"], aviso:null, group:"produto" },
+    deps:["C05","C42"], aviso:null, group:"produto" },
 
   { id:"C14", name:"Saldo", cat:"Conta, Saldo e Extrato", origem:"BaaS", canais:["App","Lia"],
     status:"exists", ia:"ia-plus",
     iaSug:"Resposta conversacional e alertas inteligentes.",
     desc:"Consulta de saldo da conta.",
     valD:"Serviço básico de canal financeiro.", valC:"Visibilidade financeira simples.",
-    deps:["C08","C05"], aviso:null, group:"produto" },
+    deps:["C08","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C15", name:"Extrato", cat:"Conta, Saldo e Extrato", origem:"BaaS", canais:["App","IB","Lia"],
     status:"exists", ia:"ia-plus",
     iaSug:"Perguntas em linguagem natural, categorização e padrões financeiros.",
     desc:"Consulta de histórico financeiro. Base para inteligência financeira.",
     valD:"Base para inteligência financeira.", valC:"Entendimento de movimentações.",
-    deps:["C08","C14","C05"], aviso:null, group:"produto" },
+    deps:["C08","C14","C05","C42"], aviso:null, group:"produto" },
 
-  { id:"C17", name:"PIX Gestão de Chaves", cat:"PIX e Transferências", origem:"BaaS", canais:["App"],
+  { id:"C17", name:"PIX Gestão de Chaves", cat:"TED e TEF", origem:"BaaS", canais:["App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Assistente guiando criação, portabilidade e dúvidas.",
     desc:"Criação, remoção, portabilidade e reivindicação de chaves PIX.",
     valD:"Completa oferta PIX.", valC:"Facilita uso de PIX.",
-    deps:["C08","C28","C07","C14","C18","C19","BL01","BL02","BL04","C05"], aviso:null, group:"produto" },
+    deps:["C08","C28","C07","C14","C18","C19","BL01","BL02","BL04","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C18", name:"PIX Transacional", cat:"PIX e Transferências", origem:"BaaS", canais:["App","IB","Lia"],
     status:"exists", ia:"ia-plus",
     iaSug:"PIX assistido, alertas de transações indevidas, sugestões de agendamento.",
     desc:"Execução de PIX via QR, copia-cola, cobrança, transferência e devolução.",
     valD:"Principal capacidade transacional para demo.", valC:"Transações reais.",
-    deps:["C08","C14","C28","C35","C07","C17","C19","BL01","BL02","BL04","C05"], aviso:null, group:"produto" },
+    deps:["C08","C14","C28","C35","C07","C17","C19","BL01","BL02","BL04","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C19", name:"PIX Agendamento", cat:"PIX e Transferências", origem:"Canal", canais:["App","IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Agendamento por linguagem natural e lembretes inteligentes.",
     desc:"Agendamento de PIX. Conveniência de pagamentos futuros.",
     valD:"Agrega conveniência ao canal.", valC:"Permite programar pagamentos.",
-    deps:["C08","C18","C07","C14","C17","BL01","BL02","BL04","C05"], aviso:null, group:"produto" },
+    deps:["C08","C18","C07","C14","C17","BL01","BL02","BL04","C05","C42"], aviso:null, group:"produto" },
 
-  { id:"C20", name:"Transferências Internas", cat:"PIX e Transferências", origem:"BaaS", canais:["App","IB"],
+  { id:"C20", name:"Transferências Internas", cat:"TED e TEF", origem:"BaaS", canais:["App","IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Atalho contextual para contatos frequentes.",
     desc:"Transferência entre contas internas.",
     valD:"Serviço financeiro básico.", valC:"Movimentação simplificada.",
-    deps:["C08","C14","C18","C07","C05"], aviso:null, group:"produto" },
+    deps:["C08","C14","C07","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C21", name:"Boletos e Pagamentos", cat:"Pagamentos, Boletos e Cobranças", origem:"BaaS", canais:["App","IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Leitura assistida, alertas de vencimento, integração com DDA.",
     desc:"Pagamento de boletos, ficha de compensação e concessionárias.",
     valD:"Amplia portfólio transacional.", valC:"Paga contas pelo canal.",
-    deps:["C08","C35","C07","C14","C05"], aviso:null, group:"produto" },
+    deps:["C08","C35","C07","C14","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C22", name:"Pagamentos em Lote", cat:"Pagamentos, Boletos e Cobranças", origem:"Canal", canais:["IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Checagem inteligente de lote, identificação de divergências CNAB.",
     desc:"Execução de pagamentos em lote. Essencial para clientes PJ.",
     valD:"Valor para PJ e operação empresarial.", valC:"Automatiza múltiplos pagamentos.",
-    deps:["C08","C23","C21","C35","C14","C05"], aviso:null, group:"produto" },
+    deps:["C08","C23","C21","C35","C14","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C23", name:"Aprovação de Pagamento", cat:"Limites, Alçadas e Aprovações", origem:"Canal", canais:["App","IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Sugerir risco para aprovações fora do padrão, priorizar aprovações.",
     desc:"Fluxo de aprovação de pagamentos. Governança para operações críticas.",
     valD:"Governança para operações críticas.", valC:"Controle transacional.",
-    deps:["C08","C07","C14","C05"], aviso:null, group:"produto" },
+    deps:["C08","C07","C14","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C24", name:"Cobranças", cat:"Pagamentos, Boletos e Cobranças", origem:"Ambos", canais:["App","IB"],
     status:"exists", ia:"ia-plus",
     iaSug:"Sugerir cobrança, follow-up, antecipação de recebíveis.",
     desc:"Geração e gerenciamento de cobranças.",
     valD:"Suporta recebíveis e fluxo comercial.", valC:"Facilita recebimentos.",
-    deps:["C08","C14","C05"], aviso:null, group:"produto" },
+    deps:["C08","C14","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C25", name:"Cash-in", cat:"Conta e Transações", origem:"BaaS", canais:["App","IB"],
     status:"exists", ia:"sem-ia",
     iaSug:null,
     desc:"Receber e colocar dinheiro na conta. Completa ciclo financeiro.",
     valD:"Completa ciclo financeiro.", valC:"Entrada de recursos.",
-    deps:["C05"], aviso:null, group:"produto" },
+    deps:["C05","C42"], aviso:null, group:"produto" },
 
   { id:"C26", name:"Lista de Contatos", cat:"Experiência e Contexto", origem:"Canal", canais:["App","Lia"],
     status:"exists", ia:"ia-plus",
     iaSug:"Hiperpersonalização e atalhos de transação por histórico.",
     desc:"Cadastro de contatos para facilitar operações.",
     valD:"Melhora usabilidade e recorrência.", valC:"Facilita transações frequentes.",
-    deps:["C05","C08"], aviso:null, group:"produto" },
+    deps:["C05","C08","C42"], aviso:null, group:"produto" },
 
   { id:"C27", name:"Notificações Push", cat:"Experiência e Canais", origem:"Canal", canais:["App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Alertas personalizados e recomendações contextuais.",
     desc:"Comunicação ativa com correntista.",
     valD:"Engajamento e segurança.", valC:"Recebe alertas e confirmações.",
-    deps:["C01","C05"], aviso:null, group:"produto" },
+    deps:["C01","C05","C42"], aviso:null, group:"produto" },
 
   { id:"C28", name:"Limites Gerais e PIX", cat:"Limites, Alçadas e Aprovações", origem:"BaaS", canais:["WA","App"],
     status:"exists", ia:"ia-plus",
     iaSug:"Sugestão e autoajuste de limites por comportamento e risco.",
     desc:"Gestão e visualização de limites PIX.",
     valD:"Mitiga fraude e parametriza risco.", valC:"Mais controle e segurança.",
-    deps:["C35","C14","C05"], aviso:null, group:"produto" },
+    deps:["C35","C14","C05","C42"], aviso:null, group:"produto" },
 
-  { id:"C35", name:"Segurança Transacional", cat:"Segurança", origem:"Canal+CoreFlow+BaaS", canais:["Todos"],
+  { id:"C35", name:"Segurança Transacional Inteligente", cat:"Segurança", origem:"Canal+CoreFlow+BaaS", canais:["Todos"],
     status:"discussao", ia:"ia-plus",
     iaSug:"Detecção de abuso, limites dinâmicos e alertas de anomalia.",
     desc:"Conjunto de controles contra execução indevida e fraude.",
     valD:"Pilar de confiança da oferta.", valC:"Proteção em transações.",
-    deps:["C08","C28","C36","C05"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
+    deps:["C05","C29","C42"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" , segNice:["C07","C04"] },
 
   { id:"C36", name:"Gestão de Rate Limit", cat:"Segurança e Orquestração", origem:"CoreFlow", canais:["Todos"],
     status:"discussao", ia:"ia-plus",
     iaSug:"Identificar padrões abusivos e ajustar limites de chamada.",
     desc:"Controle de volume/frequência de chamadas. Crítico para agentes IA.",
     valD:"Evita abuso e protege infra.", valC:"Evita instabilidade.",
-    deps:["C05"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
+    deps:["C05","C42"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" , segNice:["C07","C04"] },
 
 
   // ── NOVAS FEATURES ──
@@ -669,7 +730,7 @@ const CARDS = [
     iaSug:"Tarifas inteligentes e recomendação para economia do usuário ou aumento de rentabilidade do administrador.",
     desc:"Gestão e configuração de tarifas, cobranças recorrentes e modelos de precificação da conta.",
     valD:"Monetização flexível e inteligente da plataforma.", valC:"Transparência e economia em tarifas.",
-    deps:["C05","C07","C14","C15","C18","C21","C20"],
+    deps:["C05","C07","C14","C15","C18","C21","C20","C42"],
     aviso:null, group:"produto" },
 
   { id:"C41", name:"Alçadas e Aprovação", cat:"Limites, Alçadas e Aprovações", origem:"Canal", canais:["App","IB","WA"],
@@ -677,15 +738,29 @@ const CARDS = [
     iaSug:"Identificação e modelos de aprovação mais inteligentes com sugestões para o administrador ou usuário, modelos de comunicação.",
     desc:"Fluxos de alçada e aprovação para operações críticas. Governança transacional e operacional.",
     valD:"Controle granular de risco e compliance.", valC:"Segurança e rastreabilidade nas aprovações.",
-    deps:["C05","C07","C14","C15","C18","C21","C20"],
+    deps:["C05","C07","C14","C15","C18","C21","C20","C42"],
     aviso:null, group:"produto" },
+
+  { id:"C42", name:"Segurança As Is", cat:"Segurança", origem:"Canal+BaaS", canais:["App","IB","WA","Lia"],
+    status:"exists", ia:"sem-ia", iaSug:null,
+    desc:"Camada de segurança padrão. Base de confiança para todos os serviços.",
+    valD:"Camada de alta aplicabilidade de segurança.", valC:"Segurança transacional.",
+    deps:[], aviso:null, liaFairTag:true, group:"produto" },
+
+  { id:"C43", name:"Multi-Cloud", cat:"Infraestrutura e Plataforma", origem:"CoreFlow", canais:["API","WA"],
+    status:"discussao", ia:"ia-plus",
+    iaSug:"Integração rápida e autoconfigurável. IA para otimização de recursos e custo.",
+    desc:"Suporte a AWS, GCP e Azure. Alta flexibilidade para novos negócios.",
+    valD:"Camada de alta flexibilidade para novos negócios.", valC:"Não se aplica.",
+    deps:["C05","C04","C33","C42"], multiCloudNice:["BL07"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
   // ── COREFLOW modules (shown in produto + coreflow views) ──
   { id:"C04", name:"CoreFlow", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia","API"],
     status:"discussao", ia:"hab-ia",
     iaSug:"Camada para agentes acionarem serviços financeiros com contexto e segurança.",
     desc:"Camada de orquestração para modularizar serviços, regras, integrações e inteligência.",
     valD:"Ativo modular e vendável.", valC:"Consistência e velocidade.",
-    deps:["C05","C07","C37"],
+    deps:["C05","C07","C37","C42"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
 
   { id:"C05", name:"BFF / Camada de Integração e API", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia","API"],
@@ -693,15 +768,15 @@ const CARDS = [
     iaSug:"Contexto estruturado para agentes e logs interpretáveis.",
     desc:"Backend for Frontend modular. Abstrai complexidade dos BaaS.",
     valD:"Reduz acoplamento e variação por provedor.", valC:"Respostas mais consistentes.",
-    deps:["C08"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
+    deps:["C08","C42"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" , bffLayerTag:true },
 
   { id:"C07", name:"Business Engine", cat:"Orquestração CoreFlow", origem:"CoreFlow", canais:["App","IB","WA","Lia"],
     status:"exists", ia:"ia-plus",
     iaSug:"Sugestão de regras de negócio, autoajuste de limites e automação assistida.",
     desc:"Motor configurável para regras, limites, alçadas e workflows.",
     valD:"Vende parametrização e flexibilidade.", valC:"Regras mais consistentes.",
-    deps:["C05"],
+    deps:["C05","C42"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"produto" },
 
   { id:"C29", name:"Observabilidade Base", cat:"Segurança, Auditoria e Observabilidade", origem:"CoreFlow", canais:["Todos"],
@@ -709,7 +784,7 @@ const CARDS = [
     iaSug:"Base para explicabilidade, detecção e copiloto operacional.",
     desc:"Monitoramento essencial, logs e alertas básicos. Crítico para feira e produção.",
     valD:"Aumenta confiabilidade operacional.", valC:"Estabilidade melhorada.",
-    deps:["C04"], aviso:null, group:"coreflow" },
+    deps:["C04","C42"], aviso:null, group:"coreflow" },
 
   { id:"C37", name:"Integration Layer Single BaaS", cat:"Integração BaaS", origem:"CoreFlow", canais:["Todos"],
     status:"discussao", ia:"hab-ia",
@@ -717,7 +792,7 @@ const CARDS = [
     desc:"Conector padronizado para um BaaS/core. Base da orquestração.",
     valD:"Reduz custo de integração.", valC:"Experiência mais consistente.",
     deps:[],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" },
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"removed" },
 
   // ── POTENCIALIZAÇÃO IA ──
   { id:"C16", name:"Extrato Inteligente", cat:"IA e Dados", origem:"Canal+IA+BaaS", canais:["App","IB","Lia"],
@@ -725,7 +800,7 @@ const CARDS = [
     iaSug:"Perguntas como 'quantos PIX fiz hoje?', categorização, previsão de boletos.",
     desc:"Interpretação do passado, presente e futuro financeiro via linguagem natural.",
     valD:"Diferencia oferta com inteligência contextual.", valC:"Entendimento do seu dinheiro.",
-    deps:["C15","C04","C31"],
+    deps:["C15","C04","C31","C42"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
 
   { id:"POT02", name:"Limites Inteligentes", cat:"IA e Dados", origem:"CoreFlow", canais:["WA","App"],
@@ -733,29 +808,29 @@ const CARDS = [
     iaSug:"Autoajuste de limites por comportamento e perfil de risco.",
     desc:"Sugestão automática e ajuste de limites baseados em padrões do correntista.",
     valD:"Mitiga fraude com menos fricção.", valC:"Limites mais adequados ao perfil.",
-    deps:["C28","C31","C04","C14","C15"], aviso:null, group:"potencia" },
+    deps:["C28","C31","C04","C14","C15","C42"], aviso:null, group:"potencia" },
 
   { id:"POT03", name:"WA Copiloto", cat:"IA e Operação", origem:"CoreFlow", canais:["WA"],
     status:"discussao", ia:"ia-plus",
     iaSug:"Assistente para operação e administração bancária.",
     desc:"Copiloto IA para o Web Admin: sugestão de regras, alertas operacionais.",
     valD:"Escala operação sem crescer equipe.", valC:"Indireto: mais estabilidade.",
-    deps:["C03","C04","C29","C14","C15"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
+    deps:["C03","C04","C29","C42"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" , potNice:["C32"] },
 
   { id:"POT04", name:"Gestão de Cobranças Inteligente", cat:"Pagamentos, Boletos e Cobranças", origem:"Ambos", canais:["App","IB"],
     status:"discussao", ia:"ia-plus",
     iaSug:"Sugestão de follow-up, antecipação de recebíveis, gestão recorrente.",
     desc:"IA para gerenciamento inteligente de cobranças e recebíveis.",
     valD:"Aumenta conversão de cobranças.", valC:"Gestão automatizada de receber.",
-    deps:["C24","C04","C14","C15"], aviso:null, group:"potencia" },
+    deps:["C24","C04","C14","C15","C42"], aviso:null, group:"potencia" },
 
   { id:"POT05", name:"Módulo Campaign Inteligente", cat:"IA + Experiência", origem:"Canal", canais:["App","IB","WA"],
     status:"discussao", ia:"ia-pure",
     iaSug:"Campanhas com audiência selecionada por IA por parâmetros de comportamento.",
     desc:"Criação de campanhas Push, E-mail e SMS com audiências sugeridas pela IA.",
     valD:"Fidelização da base.", valC:"Aumenta engajamento.",
-    deps:["C04","C08","C14","C15"],
+    deps:["C04","C08","C14","C15","C42"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"potencia" },
 
   // ── SOLUÇÕES IA PURAS ──
@@ -764,9 +839,9 @@ const CARDS = [
     iaSug:"Avatar/assistente com PIX assistido, logs visuais e contexto controlado.",
     desc:"Assistente IA/avatar conversacional para correntistas. Vitrine Febraban Tech.",
     valD:"Atrai CEO/CIO/CMO e demonstra competência IA.", valC:"Interação conversacional diferenciada.",
-    deps:["C04","C18","C08","C30","C35","C14"],
+    deps:["C04","C18","C08","C14","C19","C26","C28","C07","C30","C17","C42","C20","C33"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes",
-    liaDetail: true },
+    liaDetail: true, liaNice:["C19","C26","C28","C07","C30","C20","C17"], liaFuture:[], liaExclude:["C29","C35","BL01","BL02","BL04"]  },
 
   { id:"C31", name:"AI Layer Essencial", cat:"IA", origem:"CoreFlow", canais:["Todos"],
     status:"discussao", ia:"ia-pure",
@@ -774,22 +849,22 @@ const CARDS = [
     desc:"Camada inicial de inteligência. Fundação para todas as capacidades IA.",
     valD:"Diferencial competitivo com segurança.", valC:"Melhora experiência e proteção.",
     deps:["C04","C29"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"removed" },
 
-  { id:"C32", name:"AI Layer Advanced / Copiloto Operacional", cat:"IA", origem:"CoreFlow", canais:["WA","Operação"],
+  { id:"C32", name:"Copiloto Operacional", cat:"IA", origem:"CoreFlow", canais:["WA","Operação"],
     status:"discussao", ia:"ia-pure",
     iaSug:"Copiloto para operação, regras, alertas e decisões assistidas.",
     desc:"Automação e inteligência operacional avançada.",
     valD:"Escala operação sem crescer equipe.", valC:"Indireto ao correntista.",
     deps:["C04","C31","C29"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"removed" },
 
   { id:"C30", name:"Logs Auditáveis para IA", cat:"Segurança, IA e Observabilidade", origem:"CoreFlow", canais:["Lia","WA","Operação"],
     status:"discussao", ia:"ia-pure",
     iaSug:"Mostrar visualmente o que a IA recebeu, decidiu, acionou e retornou.",
     desc:"Logs técnicos e visuais para confiança em IA. Must-have Febraban Tech.",
     valD:"Vende segurança e governança.", valC:"Aumenta confiança no atendimento IA.",
-    deps:["C29","C04"],
+    deps:["C29","C04","C42"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
 
   { id:"C33", name:"MCP / Camada de Contexto", cat:"IA e Integrações", origem:"CoreFlow", canais:["Lia","App","WA","API"],
@@ -797,15 +872,15 @@ const CARDS = [
     iaSug:"Conector padronizado para dados, ferramentas e sistemas externos.",
     desc:"Camada de contexto para agentes IA. Padroniza integrações N×M.",
     valD:"Padroniza integrações IA e reduz custo.", valC:"Respostas e ações melhores.",
-    deps:["C04"],
-    aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes" },
+    deps:["C04","C42"],
+    aviso:"Depende de desacoplamento do backend (em construção)", group:"coreflow" , mcpLinked:true },
 
   { id:"C39", name:"ZDR / Zero Data Retention", cat:"Segurança e IA", origem:"Política", canais:["Lia","IA","Operação"],
     status:"discussao", ia:"ia-pure",
     iaSug:"Política de não retenção/minimização de dados sensíveis em IA.",
     desc:"Princípio de segurança e privacidade. Não retém dados sensíveis em provedores IA.",
     valD:"Reduz risco reputacional e regulatório.", valC:"Protege dados do correntista.",
-    deps:[], aviso:null, group:"iasolucoes" },
+    deps:[], aviso:null, group:"removed" },
 
   // ── BACKLOG ──
   { id:"BL01", name:"PIX MED", cat:"PIX e Transferências", origem:"BaaS", canais:["App","IB"],
@@ -813,49 +888,49 @@ const CARDS = [
     iaSug:"Detecção de transações suspeitas.",
     desc:"Autoatendimento e visão integrada de MED (Mecanismo Especial de Devolução).",
     valD:"Compliance regulatório e redução de fraudes.", valC:"Devolução simplificada.",
-    deps:["C18","C17","C19","C14","C15","C05","C07","BL02","BL04"], aviso:null, group:"backlog" },
+    deps:["C18","C17","C19","C14","C15","C05","C07","BL02","BL04","C42"], aviso:null, group:"backlog" },
 
   { id:"BL02", name:"PIX Automático", cat:"PIX e Transferências", origem:"BaaS", canais:["App"],
     status:"dev", ia:"ia-plus",
     iaSug:"Alertas e detecção de anomalias em cobranças recorrentes.",
     desc:"Cobranças recorrentes via CPF. Debitado automaticamente em conta.",
     valD:"Nova modalidade de pagamento recorrente.", valC:"Pagamentos automáticos sem ação manual.",
-    deps:["C18","C08","C17","C19","BL01","BL04"], aviso:null, group:"backlog" },
+    deps:["C18","C08","C17","C19","BL01","BL04","C42","C05","C14","C15","C07"], aviso:null, group:"backlog" },
 
   { id:"BL03", name:"Transferência V2", cat:"PIX e Transferências", origem:"Ambos", canais:["App","IB"],
     status:"backlog", ia:"ia-plus",
     iaSug:"Sugestão de melhor rota (custo/tempo).",
     desc:"Unificação PIX, TED e transferência interna com agenda de contatos.",
     valD:"Produto unificado e diferenciado.", valC:"Experiência simplificada de transferência.",
-    deps:["C18","C20","C26","C07"], aviso:null, group:"backlog" },
+    deps:["C18","C20","C26","C07","C42"], aviso:null, group:"backlog" },
 
   { id:"BL04", name:"Limite PIX por Contato", cat:"Limites, Alçadas e Aprovações", origem:"BaaS", canais:["App"],
     status:"backlog", ia:"ia-plus",
     iaSug:"Autoajuste inteligente de limite por perfil de contato.",
     desc:"Limite de PIX configurável por lista de contato.",
     valD:"Granularidade de controle de risco.", valC:"Segurança personalizada.",
-    deps:["C28","C26","C17","C18","C19","C20","C07","BL01","BL02"], aviso:null, group:"backlog" },
+    deps:["C28","C26","C17","C18","C19","C20","C07","BL01","BL02","C42"], aviso:null, group:"backlog" },
 
   { id:"BL05", name:"Login IB e WA com App", cat:"Identidade, Acesso e Sessão", origem:"Canal", canais:["App","IB","WA"],
     status:"backlog", ia:"ia-plus",
     iaSug:"Análise de risco no login cruzado de canais.",
     desc:"Autenticação unificada do App para IB e WA Web Admin.",
     valD:"Reduz fricção e reforça segurança.", valC:"Login único e seguro.",
-    deps:["C08","C09","C05","C07","C01","C02"], aviso:null, group:"backlog" },
+    deps:["C08","C09","C05","C07","C01","C02","C42"], aviso:null, group:"backlog" },
 
   { id:"BL06", name:"Cartões de Crédito", cat:"Conta e Transações", origem:"BaaS", canais:["App","IB"],
     status:"backlog", ia:"ia-plus",
     iaSug:"Auto-gestão e integração inteligente de cartões.",
     desc:"Gestão de cartões de crédito integrada ao canal digital.",
     valD:"Expansão do portfólio financeiro.", valC:"Controle de cartão no app.",
-    deps:["C08","C14","C05","C07"], aviso:null, group:"backlog" },
+    deps:["C08","C14","C05","C07","C42"], aviso:null, group:"backlog" },
 
   { id:"BL07", name:"Integration Layer Multi BaaS", cat:"Integração BaaS", origem:"CoreFlow", canais:["Todos"],
     status:"backlog", ia:"ia-plus",
     iaSug:"Agentes e canais independentes de provedor.",
     desc:"Capacidade de operar múltiplos cores/BaaS. Reduz lock-in.",
     valD:"Reduz lock-in e retrabalho.", valC:"Menor impacto de troca de fornecedor.",
-    deps:["C37","C05","C07"], aviso:null, group:"backlog" },
+    deps:["C37","C05","C07","C42"], aviso:null, group:"backlog" },
 ];
 
 // ── ID lookup ──
@@ -898,7 +973,7 @@ const VIEW_GROUPS = {
 // Build view: primary cards + context-dep cards
 function buildViewCards(view) {
   const groups = VIEW_GROUPS[view] || ['produto'];
-  const primaryIds = new Set(CARDS.filter(c => groups.includes(c.group)).map(c => c.id));
+  const primaryIds = new Set(CARDS.filter(c => groups.includes(c.group) && c.group !== 'removed').map(c => c.id));
   const contextIds = new Set();
 
   primaryIds.forEach(id => {
@@ -910,7 +985,14 @@ function buildViewCards(view) {
   });
 
   // Order: primary first, then context
-  const primaryCards = CARDS.filter(c => primaryIds.has(c.id));
+  let primaryCards = CARDS.filter(c => primaryIds.has(c.id));
+  // CoreFlow view: enforce C04 -> C33 -> C29 order at top
+  if (currentView === 'coreflow') {
+    const cfOrder = ['C04','C33','C29'];
+    const cfTop = cfOrder.map(id => primaryCards.find(c=>c.id===id)).filter(Boolean);
+    const cfRest = primaryCards.filter(c => !cfOrder.includes(c.id));
+    primaryCards = [...cfTop, ...cfRest];
+  }
   const contextCards = CARDS.filter(c => contextIds.has(c.id));
 
   return { primaryCards, contextCards, primaryIds, contextIds };
@@ -984,6 +1066,25 @@ function cardHTML(card, isCtx) {
     ${card.aviso ? `<div class="card-warning">⚠ ${card.aviso}</div>` : ''}
     ${card.waBacklog ? `<div style="margin-top:4px;padding:2px 5px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:3px;font-size:8px;color:var(--amber2)">📋 Novo WA no Backlog</div>` : ''}
     ${card.userChannel ? `<div style="margin-top:4px;padding:2px 5px;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);border-radius:3px;font-size:8px;color:#facc15;font-weight:600;letter-spacing:.04em">📱 CANAL DO USUÁRIO</div>` : ''}
+    ${card.liaFairTag ? '<div class="card-fair-tag">🎪 Lia — Interface Para Feira</div>' : ''}
+    ${card.bffLayerTag ? '<div class="card-bff-tag">⛓ Integration Layer Single BaaS</div>' : ''}
+    ${card.id === 'C35' ? '<div class="card-zdr-tag">🔒 ZDR — Zero Data Retention</div>' : ''}
+    ${card.id === 'C17' ? '<div style="margin-top:4px;padding:2px 5px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.35);border-radius:3px;font-size:8px;color:var(--purple3);">Lia — MVP possui consultas no DICT</div>' : ''}
+  </div>`;
+}
+
+function cfPairHTML(c04, c33, isCtx) {
+  if (!c04 || !c33) {
+    return (c04 ? cardHTML(c04, isCtx) : '') + (c33 ? cardHTML(c33, isCtx) : '');
+  }
+  return `<div class="cf-mcp-pair">
+    ${cardHTML(c04, isCtx)}
+    <div class="cf-mcp-connector-bar">
+      <div class="conn-dot"></div>
+      <div class="conn-line"></div>
+      <div class="conn-dot"></div>
+    </div>
+    ${cardHTML(c33, isCtx)}
   </div>`;
 }
 
@@ -1063,7 +1164,16 @@ function renderMosaic() {
         <div class="section-divider-count">${filtPrimary.length}</div>
       </div>
       <div class="mosaic" style="margin-bottom:4px">
-        ${filtPrimary.map(c => cardHTML(c, false)).join('')}
+        ${(() => {
+          if (currentView !== 'coreflow') {
+            return filtPrimary.map(c => cardHTML(c, false)).join('');
+          }
+          // CoreFlow view: render C04+C33 as a pair, rest normally
+          const c04 = filtPrimary.find(c => c.id === 'C04');
+          const c33 = filtPrimary.find(c => c.id === 'C33');
+          const rest = filtPrimary.filter(c => c.id !== 'C04' && c.id !== 'C33');
+          return cfPairHTML(c04, c33, false) + rest.map(c => cardHTML(c, false)).join('');
+        })()}
       </div>`;
     }
     // Context dep cards
@@ -1106,10 +1216,25 @@ function selectCard(id) {
   if (card) openPanel(card);
 }
 
+function applyLiaDeps(card) {
+  const niceSet=new Set(card.liaNice||[]);
+  const futSet=new Set(card.liaFuture||[]);
+  if(!niceSet.size&&!futSet.size) return;
+  document.querySelectorAll('.card[data-id]').forEach(el=>{
+    const cid=el.dataset.id;
+    if(niceSet.has(cid)){el.classList.remove('dep-of','dimmed');el.classList.add('dep-nice');}
+    else if(futSet.has(cid)){el.classList.remove('dep-of','dimmed');el.classList.add('dep-future');}
+  });
+}
+
 function reapplySelection() {
   if (!selectedId) return;
   const cascadeDeps = getCascadeDeps(selectedId);
   cascadeDeps.delete(selectedId);
+
+  // Respect liaExclude: cards that must not be highlighted even via cascade
+  const selCard = byId[selectedId];
+  const excludeSet = new Set(selCard && selCard.liaExclude ? selCard.liaExclude : []);
 
   // Only process cards currently rendered in the mosaic
   const visibleEls = document.querySelectorAll('.card[data-id]');
@@ -1117,8 +1242,9 @@ function reapplySelection() {
 
   visibleEls.forEach(el => {
     const cid = el.dataset.id;
-    el.classList.remove('dep-of','dep-by','selected','dimmed');
+    el.classList.remove('dep-of','dep-by','selected','dimmed','dep-nice','dep-future');
     if (cid === selectedId) { el.classList.add('selected'); return; }
+    if (excludeSet.has(cid)) { el.classList.add('dimmed'); return; }
     if (cascadeDeps.has(cid)) { el.classList.add('dep-of'); return; }
     // Only mark dep-by for cards in visible set
     const otherCascade = getCascadeDeps(cid);
@@ -1131,7 +1257,7 @@ function reapplySelection() {
 function clearSelection() {
   selectedId = null;
   document.querySelectorAll('.card').forEach(el => {
-    el.classList.remove('dep-of','dep-by','selected','dimmed');
+    el.classList.remove('dep-of','dep-by','selected','dimmed','dep-nice','dep-future');
   });
   document.getElementById('depBar').classList.remove('visible');
   closePanel();
@@ -1140,7 +1266,8 @@ function clearSelection() {
 // ── Panel ──
 function openPanel(card) {
   if (card.liaDetail) {
-    renderLiaPanel();
+    renderLiaPanel(card);
+    setTimeout(()=>applyLiaDeps(card),10);
   } else {
     renderCardPanel(card);
   }
@@ -1196,7 +1323,7 @@ function renderCardPanel(card) {
   `;
 }
 
-function renderLiaPanel() {
+function renderLiaPanel(card) {
   document.getElementById('panelContent').innerHTML = `
     <div class="panel-id">C34</div>
     <div class="panel-name" style="color:var(--purple3)">Lia — Assistente de IA</div>
@@ -1249,19 +1376,32 @@ function renderLiaPanel() {
       </div>
     </div>
 
-    <div class="ps">
-      <div class="ps-title">🔴 Dependências obrigatórias</div>
+        <div class="ps">
+      <div class="ps-title">🔴 Dependências Obrigatórias</div>
       <div class="dep-list">
-        ${['C04','C08','C18','C14','C35','C30','C29'].map(id=>{
-          const c = byId[id];
-          if(!c) return '';
-          return `<div class="dep-item" onclick="selectCard('${c.id}')">
-            <span class="dep-arr">→</span>
-            <span class="dep-id">${c.id}</span>
-            <span>${c.name}</span>
-          </div>`;
-        }).join('')}
+        ${(card.deps||[]).filter(id=>!(card.liaNice||[]).includes(id)&&!(card.liaFuture||[]).includes(id)).map(id=>{
+          const c=byId[id];if(!c)return "";
+          return `<div class="dep-item" onclick="selectCard('${c.id}')"><span class="dep-arr">→</span><span class="dep-id">${c.id}</span><span>${c.name}</span></div>`;
+        }).join("")}
         <div class="mh-item" style="padding:3px 7px"><span class="mh-dot-req">●</span><span style="font-size:10px">BaaS PIX</span></div>
+      </div>
+    </div>
+    <div class="ps">
+      <div class="ps-title" style="color:var(--orange)">🟡 Nice to Have</div>
+      <div class="dep-list">
+        ${(card.liaNice||[]).map(id=>{
+          const c=byId[id];if(!c)return "";
+          return `<div class="dep-item" style="border-left:2px dashed var(--orange)" onclick="selectCard('${c.id}')"><span class="dep-arr">→</span><span class="dep-id">${c.id}</span><span>${c.name}</span></div>`;
+        }).join("")}
+      </div>
+    </div>
+    <div class="ps">
+      <div class="ps-title" style="color:#3b82f6">🔵 Implementação Futura</div>
+      <div class="dep-list">
+        ${(card.liaFuture||[]).map(id=>{
+          const c=byId[id];if(!c)return "";
+          return `<div class="dep-item" style="border-left:2px dashed #1e40af" onclick="selectCard('${c.id}')"><span class="dep-arr">→</span><span class="dep-id">${c.id}</span><span>${c.name}</span></div>`;
+        }).join("")}
       </div>
     </div>
 
