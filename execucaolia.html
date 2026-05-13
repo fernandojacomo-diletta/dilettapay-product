@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lia — Arquitetura Viva da Operação</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --black:#050507;--ink:#09090f;--dark:#0e0e18;--card:#12121e;--raise:#181826;
+  --line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.11);--line3:rgba(255,255,255,0.18);
+  --white:#ffffff;--off:#e6e6f2;--muted:#6a6a82;--dim:#38384c;
+  --red:#e5373a;--red2:#ff4d50;--reddim:rgba(229,55,58,0.14);--redglo:rgba(229,55,58,0.38);
+  --ai:#a78bfa;--ai2:#c4b5fd;--aidim:rgba(167,139,250,0.11);
+  --cf:#22d3ee;--cf2:#67e8f9;--cfdim:rgba(34,211,238,0.09);--cfglo:rgba(34,211,238,0.32);
+  --sec:#fb923c;--secdim:rgba(251,146,60,0.11);
+  --api:#60a5fa;--apidim:rgba(96,165,250,0.11);
+  --baas:#34d399;--baasdim:rgba(52,211,153,0.11);
+  --pix:#f472b6;--pixdim:rgba(244,114,182,0.11);
+  --gcp:#4285f4;--gcpdim:rgba(66,133,244,0.11);
+  --ok:#4ade80;--okglo:rgba(74,222,128,0.32);--warn:#fbbf24;
+  --sans:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:var(--sans);background:var(--black);color:var(--white);-webkit-font-smoothing:antialiased}
+
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.amb-orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.15}
+.orb-1{width:650px;height:650px;background:var(--ai);top:-220px;left:-120px}
+.orb-2{width:520px;height:520px;background:var(--red);top:-160px;right:-90px}
+.orb-3{width:420px;height:420px;background:var(--cf);bottom:-100px;left:35%;opacity:0.06}
+
+#shell{position:relative;z-index:1;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+#header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 22px 10px;border-bottom:1px solid var(--line)}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-logo{width:27px;height:27px;border-radius:7px;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:white;flex-shrink:0}
+.hdr-name{font-size:14px;font-weight:600;letter-spacing:-0.3px}
+.hdr-sep{width:1px;height:14px;background:var(--line2);flex-shrink:0}
+.hdr-tagline{font-size:11px;color:var(--muted)}
+.hdr-center{text-align:center}
+.hdr-title{font-size:11px;font-weight:500;color:var(--off);letter-spacing:0.06em;text-transform:uppercase}
+.hdr-sub{font-size:9.5px;color:var(--muted);margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.live-counter{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;color:var(--muted);border:1px solid var(--line2);padding:3px 9px;border-radius:100px}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+#live-evt-count{color:var(--cf2);font-weight:600}
+.mode-pill{display:flex;background:var(--dark);border:1px solid var(--line2);border-radius:100px;padding:3px;gap:2px}
+.mode-btn{font-family:var(--sans);font-size:11px;font-weight:500;padding:4px 13px;border-radius:100px;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--muted)}
+.mode-btn.active{background:var(--white);color:var(--black)}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* JOURNEY SELECTOR */
+#journey-selector{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;transition:opacity 0.35s ease,transform 0.35s ease}
+#journey-selector.hidden{opacity:0;pointer-events:none;transform:scale(0.97)}
+.jsel-kicker{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--red)}
+.jsel-title{font-size:clamp(18px,2.2vw,30px);font-weight:300;letter-spacing:-0.4px;text-align:center;line-height:1.2}
+.jsel-title strong{font-weight:600}
+.jsel-sub{font-size:12px;color:var(--muted);text-align:center;max-width:460px;line-height:1.6}
+.jsel-cards{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;max-width:720px}
+.jcard{flex:1;min-width:190px;max-width:220px;background:var(--card);border:1px solid var(--line2);border-radius:13px;padding:22px 20px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;border-left-width:3px}
+.jcard::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.25s}
+.jcard:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,0.4)}
+.jcard.jcard-pix{border-left-color:var(--ai)}
+.jcard.jcard-pix:hover{border-color:var(--ai);border-left-color:var(--ai)}
+.jcard.jcard-pix::before{background:radial-gradient(circle at 0% 50%,rgba(167,139,250,0.07),transparent 70%)}
+.jcard.jcard-key{border-left-color:var(--pix)}
+.jcard.jcard-key:hover{border-color:var(--pix);border-left-color:var(--pix)}
+.jcard.jcard-key::before{background:radial-gradient(circle at 0% 50%,rgba(244,114,182,0.07),transparent 70%)}
+.jcard.jcard-bal{border-left-color:var(--baas)}
+.jcard.jcard-bal:hover{border-color:var(--baas);border-left-color:var(--baas)}
+.jcard.jcard-bal::before{background:radial-gradient(circle at 0% 50%,rgba(52,211,153,0.07),transparent 70%)}
+.jcard:hover::before{opacity:1}
+.jcard-title{font-size:14.5px;font-weight:600;letter-spacing:-0.3px;margin-bottom:7px;transition:color 0.2s}
+.jcard.jcard-pix:hover .jcard-title{color:var(--ai2)}
+.jcard.jcard-key:hover .jcard-title{color:var(--pix)}
+.jcard.jcard-bal:hover .jcard-title{color:var(--baas)}
+.jcard-desc{font-size:11px;color:var(--muted);line-height:1.6}
+.jcard-arrow{position:absolute;top:13px;right:13px;font-size:11px;color:var(--dim);opacity:0;transition:opacity 0.18s}
+.jcard:hover .jcard-arrow{opacity:1}
+
+/* EXECUTIVE MODE */
+#exec-mode{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.exec-hero{text-align:center;padding:0 22px;margin-bottom:10px;flex-shrink:0}
+.exec-kicker{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--red);margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:7px}
+.kicker-badge{background:var(--reddim);border:1px solid rgba(229,55,58,0.22);border-radius:100px;padding:2px 9px;font-size:8.5px;color:var(--red2)}
+.exec-headline{font-size:clamp(16px,1.9vw,24px);font-weight:300;line-height:1.2;color:var(--white);letter-spacing:-0.4px}
+.exec-headline strong{font-weight:600}
+.exec-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.journey-badge{display:inline-flex;align-items:center;gap:6px;margin-top:7px;font-size:10px;font-weight:500;padding:3px 10px;border-radius:100px;border:1px solid var(--line2);color:var(--muted);cursor:pointer;transition:all 0.18s}
+.journey-badge:hover{border-color:var(--line3);color:var(--off);background:var(--raise)}
+.journey-badge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* TIMELINE */
+.timeline-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 16px;min-height:0}
+.steps-row{display:flex;align-items:flex-start;justify-content:space-between;position:relative;padding:0 4px}
+.step-conn{flex:1;height:2px;margin-top:29px;position:relative;background:var(--line);overflow:hidden;flex-shrink:1;min-width:8px}
+.step-conn-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--red),var(--ai));transition:width 0.55s ease}
+.step-conn-pulse{position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--red2);box-shadow:0 0 10px var(--redglo);left:-8px;opacity:0;transition:left 0.5s ease,opacity 0.1s}
+.step{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:74px;cursor:pointer}
+.step-node{width:56px;height:56px;border-radius:50%;border:2px solid var(--line2);background:var(--card);display:flex;align-items:center;justify-content:center;position:relative;transition:all 0.3s ease;flex-shrink:0;z-index:2}
+.step-node::before{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid transparent;transition:all 0.32s ease}
+.step-num{position:absolute;top:-5px;right:-5px;width:15px;height:15px;background:var(--dim);border-radius:50%;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all 0.26s;border:1px solid var(--line)}
+.step-title{font-size:8.5px;font-weight:600;color:var(--muted);line-height:1.3;transition:color 0.26s;text-align:center;margin-top:7px;width:74px}
+.step.st-done .step-node{border-color:rgba(74,222,128,0.42);background:rgba(74,222,128,0.07);box-shadow:0 0 16px rgba(74,222,128,0.14)}
+.step.st-done .step-num{background:var(--ok);color:var(--black);border-color:transparent}
+.step.st-done .step-title{color:var(--off)}
+.step.st-active .step-node{border-color:var(--red);background:var(--reddim);box-shadow:0 0 22px var(--redglo);transform:scale(1.09)}
+.step.st-active .step-num{background:var(--red);color:white;border-color:transparent}
+.step.st-active .step-title{color:var(--white)}
+.step.st-active .step-node::before{border-color:var(--red);animation:ring-expand 1.2s ease-out infinite}
+@keyframes ring-expand{0%{inset:-7px;opacity:0.8}100%{inset:-20px;opacity:0}}
+.steps-all-done .step.st-done .step-node{box-shadow:0 0 20px rgba(74,222,128,0.2)}
+.steps-all-done .step-conn-fill{background:linear-gradient(90deg,rgba(74,222,128,0.48),rgba(34,211,238,0.42)) !important}
+
+/* FOCUS CARD */
+.focus-wrap{display:flex;justify-content:center;padding:10px 16px 0;flex-shrink:0;min-height:94px}
+.focus-card{background:var(--card);border:1px solid var(--line2);border-radius:13px;padding:12px 17px;max-width:680px;width:100%;display:flex;gap:12px;align-items:flex-start;transition:all 0.36s ease;opacity:0;transform:translateY(6px);position:relative;overflow:hidden}
+.focus-card.visible{opacity:1;transform:none}
+.focus-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0.4}
+.fc-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.fc-content{flex:1;min-width:0}
+.fc-step-label{font-size:7.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--red);margin-bottom:2px}
+.fc-title{font-size:13px;font-weight:600;color:var(--white);letter-spacing:-0.2px;margin-bottom:3px}
+.fc-desc{font-size:10.5px;color:var(--muted);line-height:1.5}
+.fc-pill-row{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.fc-pill{font-size:9px;font-weight:500;padding:2px 8px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);color:var(--muted);display:flex;align-items:center;gap:4px}
+.fc-pill.highlight{border-color:rgba(74,222,128,0.26);color:var(--ok);background:rgba(74,222,128,0.05)}
+.fc-pill.ai{border-color:rgba(167,139,250,0.26);color:var(--ai2);background:var(--aidim)}
+.fc-pill.cf{border-color:rgba(34,211,238,0.26);color:var(--cf2);background:var(--cfdim)}
+.fc-pill.warn{border-color:rgba(251,146,60,0.26);color:var(--sec);background:var(--secdim)}
+.fc-pill.pix{border-color:rgba(244,114,182,0.26);color:var(--pix);background:var(--pixdim)}
+.fc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.fc-status{font-size:9px;font-weight:600;display:flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:0.06em}
+.fc-status-dot{width:5px;height:5px;border-radius:50%}
+.status-active .fc-status-dot{background:var(--red);box-shadow:0 0 6px var(--red2);animation:blink 0.8s infinite}
+.status-active .fc-status{color:var(--red2)}
+.status-done .fc-status-dot{background:var(--ok)}
+.status-done .fc-status{color:var(--ok)}
+.fc-time{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.chat-bubble{display:inline-flex;align-items:center;gap:6px;background:var(--raise);border:1px solid var(--line2);border-radius:100px;padding:4px 11px 4px 8px;font-size:10px;color:var(--off);margin-top:6px}
+.chat-bubble .avatar{width:16px;height:16px;border-radius:50%;background:var(--ai);display:flex;align-items:center;justify-content:center;font-size:8px}
+
+/* PLAYBAR */
+.playbar{display:flex;align-items:center;justify-content:center;gap:12px;padding:9px 22px;flex-shrink:0;border-top:1px solid var(--line)}
+.playbar.hidden{display:none}
+.play-btn{width:33px;height:33px;border-radius:50%;background:var(--red);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0}
+.play-btn:hover{background:var(--red2);box-shadow:0 0 12px var(--redglo)}
+.progress-track{flex:1;max-width:360px;height:3px;background:var(--raise);border-radius:100px;position:relative;cursor:pointer;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--ai));border-radius:100px;transition:width 0.3s ease;width:0}
+.play-step-label{font-size:10px;color:var(--muted);min-width:100px;text-align:center}
+.btn-tech-trigger{font-family:var(--sans);font-size:10px;font-weight:500;background:transparent;color:var(--muted);border:1px solid var(--line2);border-radius:100px;padding:5px 12px;cursor:pointer;gap:5px;transition:all 0.18s;display:flex;align-items:center}
+.btn-tech-trigger:hover{color:var(--cf2);border-color:rgba(34,211,238,0.26);background:var(--cfdim)}
+
+/* TECHNICAL MODE */
+#tech-mode{position:absolute;inset:0;background:var(--black);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.28s ease;z-index:20;overflow:hidden}
+#tech-mode.visible{opacity:1;pointer-events:all}
+.tech-header{display:flex;align-items:center;justify-content:space-between;padding:11px 22px;border-bottom:1px solid var(--line);flex-shrink:0}
+.tech-title{font-size:10px;font-weight:600;color:var(--cf2);text-transform:uppercase;letter-spacing:0.1em;display:flex;align-items:center;gap:7px}
+.tech-title::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cf);box-shadow:0 0 6px var(--cf)}
+.btn-back{font-family:var(--sans);font-size:11px;font-weight:500;background:transparent;color:var(--muted);border:1px solid var(--line2);border-radius:100px;padding:5px 13px;cursor:pointer;transition:all 0.16s;display:flex;align-items:center;gap:5px}
+.btn-back:hover{color:var(--white);background:var(--raise)}
+.tech-body{flex:1;display:grid;grid-template-columns:228px 1fr 254px;gap:0;overflow:hidden}
+.tech-arch{border-right:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;scrollbar-width:none}
+.tech-arch::-webkit-scrollbar{display:none}
+.arch-heading{font-size:7.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.arch-node{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;border:1px solid transparent;cursor:pointer;transition:all 0.16s}
+.arch-node:hover{background:var(--raise);border-color:var(--line2)}
+.arch-node.selected{background:var(--raise)}
+.arch-node.arch-live{animation:arch-pulse 0.55s ease}
+@keyframes arch-pulse{0%{background:rgba(34,211,238,0.14)}100%{background:var(--raise)}}
+.arch-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:box-shadow 0.26s}
+.arch-node.selected .arch-dot{box-shadow:0 0 7px currentColor}
+.arch-name{font-size:10px;font-weight:500;flex:1}
+.arch-type{font-size:7.5px;color:var(--muted)}
+.arch-ms{font-family:var(--mono);font-size:8px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.arch-ms.done{color:var(--ok)}.arch-ms.running{color:var(--cf);animation:blink 0.7s infinite}
+.arch-arrow{text-align:center;color:var(--dim);font-size:9px;padding:1px 0}
+.tech-detail{display:flex;flex-direction:column;overflow:hidden}
+.tech-detail-tabs{display:flex;border-bottom:1px solid var(--line);flex-shrink:0}
+.tech-tab{font-family:var(--sans);font-size:10px;font-weight:500;padding:9px 14px;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.16s;border-bottom:2px solid transparent}
+.tech-tab.active{color:var(--white);border-bottom-color:var(--red)}
+.tech-tab:hover{color:var(--off)}
+.tech-detail-body{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:var(--raise) transparent}
+.payload-block{margin-bottom:12px}
+.payload-label{font-size:7.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:5px;display:flex;justify-content:space-between}
+.payload-body{background:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:10px;font-family:var(--mono);font-size:8.5px;line-height:1.7;color:#94a3b8;overflow-x:auto;white-space:pre}
+.jk{color:#60a5fa}.js{color:#86efac}.jn{color:#fb923c}.jb{color:#f9a8d4}
+.rule-list{display:flex;flex-direction:column;gap:4px}
+.rule-item{display:flex;gap:8px;align-items:flex-start;font-size:10px;color:var(--muted);line-height:1.5;padding:6px 9px;background:var(--dark);border-radius:6px;border:1px solid var(--line)}
+.rule-check{color:var(--ok);flex-shrink:0}
+.infra-section{margin-top:10px}
+.infra-title{font-size:7.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--gcp);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.infra-title::before{content:'☁';font-size:10px}
+.infra-tags{display:flex;flex-wrap:wrap;gap:4px}
+.infra-tag{font-size:8px;padding:3px 8px;border-radius:100px;border:1px solid rgba(66,133,244,0.22);color:var(--gcp);background:var(--gcpdim);font-weight:500}
+.tech-log{border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.tech-log-head{padding:9px 13px;border-bottom:1px solid var(--line);font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.log-head-right{display:flex;align-items:center;gap:7px}
+.log-live-dot{width:5px;height:5px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok);animation:blink 1.4s infinite}
+.log-count{font-family:var(--mono);font-size:8.5px;color:var(--cf2)}
+.tech-log-stream{flex:1;overflow-y:auto;padding:5px 0;scrollbar-width:thin;scrollbar-color:var(--raise) transparent}
+.log-line{display:grid;grid-template-columns:56px 1fr;gap:6px;padding:2px 13px;font-family:var(--mono);font-size:7.5px;border-left:2px solid transparent;transition:background 0.1s}
+.log-line:hover{background:var(--dark)}
+.log-line.fresh{animation:log-flash 0.3s ease}
+@keyframes log-flash{0%{background:rgba(34,211,238,0.08)}100%{background:transparent}}
+.log-ts{color:var(--dim)}.log-ev{color:var(--muted)}
+.log-line.c-ai{border-left-color:var(--ai)}.log-line.c-ai .log-ev{color:var(--ai2)}
+.log-line.c-cf{border-left-color:var(--cf)}.log-line.c-cf .log-ev{color:var(--cf2)}
+.log-line.c-sec{border-left-color:var(--sec)}.log-line.c-sec .log-ev{color:var(--sec)}
+.log-line.c-api{border-left-color:var(--api)}.log-line.c-api .log-ev{color:var(--api)}
+.log-line.c-ok{border-left-color:var(--ok)}.log-line.c-ok .log-ev{color:var(--ok)}
+.log-line.c-pix{border-left-color:var(--pix)}.log-line.c-pix .log-ev{color:var(--pix)}
+.log-line.c-gcp{border-left-color:var(--gcp)}.log-line.c-gcp .log-ev{color:#93bbfd}
+
+/* ═══ RESULT CARD (floating bottom-right, non-blocking) ═══ */
+#result-screen{
+  position:absolute;inset:0;z-index:40;
+  pointer-events:none; /* transparent to clicks except card */
+  display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:0 20px 16px 0;
+}
+#result-card{
+  pointer-events:auto;
+  width:100%;max-width:380px;
+  background:rgba(15,15,24,0.97);
+  border:1px solid rgba(74,222,128,0.18);
+  border-radius:14px;
+  box-shadow:0 0 0 1px rgba(74,222,128,0.04), 0 20px 50px rgba(0,0,0,0.65);
+  overflow:hidden;
+  transform:translateY(16px) scale(0.97);
+  opacity:0;
+  transition:transform 0.38s cubic-bezier(0.34,1.4,0.64,1), opacity 0.3s ease;
+}
+#result-card.visible{transform:translateY(0) scale(1);opacity:1}
+#result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(74,222,128,0.5) 40%,rgba(34,211,238,0.35) 70%,transparent 100%)}
+.rc-inner{padding:16px 18px 14px}
+
+/* card header */
+.rc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.rc-badge{display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.2);border-radius:100px;padding:3px 10px 3px 7px}
+.rc-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pulse-ok 2s infinite}
+@keyframes pulse-ok{0%,100%{box-shadow:0 0 6px rgba(74,222,128,0.8)}50%{box-shadow:0 0 14px rgba(74,222,128,1)}}
+.rc-badge-txt{font-size:9.5px;font-weight:600;color:var(--ok);text-transform:uppercase;letter-spacing:0.08em}
+.rc-close{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--muted);font-family:var(--sans);font-size:9px;padding:3px 9px;cursor:pointer;transition:all 0.16s;white-space:nowrap}
+.rc-close:hover{background:var(--raise);color:var(--off);border-color:var(--line3)}
+
+/* card amount */
+.rc-main{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px}
+.rc-amount{font-size:28px;font-weight:700;letter-spacing:-1.5px;color:var(--white);line-height:1}
+.rc-dest{font-size:10.5px;color:var(--muted);margin-top:3px}
+.rc-check{width:38px;height:38px;border-radius:50%;background:rgba(74,222,128,0.08);border:2px solid rgba(74,222,128,0.28);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* card meta */
+.rc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.rcm{background:var(--dark);border:1px solid var(--line);border-radius:7px;padding:7px 6px;text-align:center}
+.rcm-label{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px}
+.rcm-val{font-size:10.5px;font-weight:600;font-family:var(--mono)}
+.rcm-val.ok{color:var(--ok)}.rcm-val.cf{color:var(--cf2)}.rcm-val.ai{color:var(--ai2)}
+
+/* trace line */
+.rc-trace{font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px}
+
+/* actions */
+.rc-actions{display:flex;flex-direction:column;gap:5px}
+.rc-btn{font-family:var(--sans);font-size:10.5px;font-weight:500;padding:8px 12px;border-radius:8px;cursor:pointer;transition:all 0.16s;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-align:center}
+.rc-btn.primary{background:linear-gradient(135deg,rgba(167,139,250,0.16),rgba(34,211,238,0.11));border:1px solid rgba(167,139,250,0.28);color:var(--ai2);font-weight:600}
+.rc-btn.primary:hover{border-color:rgba(167,139,250,0.45);box-shadow:0 3px 14px rgba(167,139,250,0.15);transform:translateY(-1px)}
+.rc-row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.rc-btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--muted)}
+.rc-btn.ghost:hover{background:var(--raise);color:var(--off)}
+.rc-btn.new-txn{background:transparent;border:1px solid rgba(229,55,58,0.2);color:var(--red2)}
+.rc-btn.new-txn:hover{background:var(--reddim);border-color:var(--red)}
+.rc-btn.dl{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.rc-btn.dl:hover{background:var(--raise);color:var(--off)}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(15,15,24,0.96);border:1px solid rgba(74,222,128,0.26);border-radius:100px;padding:7px 15px;font-size:11px;font-weight:500;color:var(--ok);display:flex;align-items:center;gap:6px;opacity:0;transition:all 0.25s ease;z-index:200;pointer-events:none;box-shadow:0 8px 26px rgba(0,0,0,0.4);white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--raise);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="ambient"><div class="amb-orb orb-1"></div><div class="amb-orb orb-2"></div><div class="amb-orb orb-3"></div></div>
+
+<div id="shell">
+  <header id="header">
+    <div class="hdr-brand">
+      <div class="hdr-logo">L</div>
+      <div class="hdr-name">Lia</div>
+      <div class="hdr-sep"></div>
+      <div class="hdr-tagline">Assistente financeira inteligente</div>
+    </div>
+    <div class="hdr-center">
+      <div class="hdr-title" id="hdr-title">Arquitetura Viva da Operação</div>
+      <div class="hdr-sub">Uma ação simples. Muitas camadas trabalhando.</div>
+    </div>
+    <div class="hdr-right">
+      <div class="live-counter" id="live-counter" style="display:none">
+        <div class="live-dot"></div>
+        <span id="live-evt-count">0</span>
+        <span style="color:var(--muted)">eventos</span>
+      </div>
+      <div class="mode-pill">
+        <button class="mode-btn active" id="btn-exec-mode" onclick="setMode('exec')">Visão Geral</button>
+        <button class="mode-btn" id="btn-tech-mode" onclick="setMode('tech')">Detalhes Técnicos</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="main">
+
+    <!-- JOURNEY SELECTOR -->
+    <div id="journey-selector">
+      <div class="jsel-kicker">FEBRABAN TECH 2026</div>
+      <div class="jsel-title">Uma mensagem para a Lia.<br><strong>Escolha a operação para visualizar.</strong></div>
+      <div class="jsel-sub">Cada operação percorre um conjunto distinto de camadas — e quando o BACEN é ou não necessário.</div>
+      <div class="jsel-cards">
+        <div class="jcard jcard-pix" onclick="selectJourney('pix')">
+          <div class="jcard-arrow">→</div>
+          <div class="jcard-title">Transferência PIX</div>
+          <div class="jcard-desc">Fluxo completo: da conversa ao débito confirmado pelo BACEN via SPI.</div>
+        </div>
+        <div class="jcard jcard-key" onclick="selectJourney('key')">
+          <div class="jcard-arrow">→</div>
+          <div class="jcard-title">Consulta de Chave PIX</div>
+          <div class="jcard-desc">Validação de chave via DICT/BACEN — identificação sem transação.</div>
+        </div>
+        <div class="jcard jcard-bal" onclick="selectJourney('balance')">
+          <div class="jcard-arrow">→</div>
+          <div class="jcard-title">Consulta de Saldo</div>
+          <div class="jcard-desc">Saldo via BaaS — operação interna. BACEN não participa.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXECUTIVE MODE -->
+    <div id="exec-mode">
+      <div class="exec-hero" id="exec-hero">
+        <div class="exec-kicker">FEBRABAN TECH 2026 <span class="kicker-badge" id="journey-kicker">PIX</span></div>
+        <div class="exec-headline" id="exec-headline">Uma mensagem para a Lia.<br><strong>Nove camadas em ação.</strong></div>
+        <div class="exec-sub" id="exec-sub">Da conversa ao débito confirmado pelo BACEN — em milissegundos.</div>
+        <div class="journey-badge" id="journey-badge" onclick="goToSelector()">
+          <span class="journey-badge-dot" id="badge-dot" style="background:#a78bfa"></span>
+          <span id="badge-label">Transferência PIX</span>
+          <span style="color:var(--dim);font-size:9px;margin-left:2px">↺ trocar</span>
+        </div>
+      </div>
+      <div class="timeline-wrap"><div class="steps-row" id="steps-row"></div></div>
+      <div class="focus-wrap">
+        <div class="focus-card" id="focus-card">
+          <div class="fc-icon" id="fc-icon">💬</div>
+          <div class="fc-content">
+            <div class="fc-step-label" id="fc-step-label">Etapa 1</div>
+            <div class="fc-title" id="fc-title">—</div>
+            <div class="fc-desc" id="fc-desc"></div>
+            <div class="fc-pill-row" id="fc-pills"></div>
+          </div>
+          <div class="fc-right">
+            <div class="fc-status status-active" id="fc-status"><div class="fc-status-dot"></div><span id="fc-status-text">Em execução</span></div>
+            <div class="fc-time" id="fc-time">+0ms</div>
+          </div>
+        </div>
+      </div>
+      <div class="playbar hidden" id="playbar">
+        <button class="play-btn" id="play-btn" onclick="togglePlay()"><svg id="play-icon" width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M3 2L11 7L3 12V2Z" fill="white"/></svg></button>
+        <div class="progress-track" id="progress-track" onclick="seekProgress(event)"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="play-step-label" id="play-step-label">Iniciando...</div>
+        <button class="btn-tech-trigger" onclick="setMode('tech')">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="1" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="7" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+          Explorar execução
+        </button>
+      </div>
+    </div>
+
+    <!-- TECHNICAL MODE -->
+    <div id="tech-mode">
+      <div class="tech-header">
+        <div class="tech-title">Análise Técnica — <span id="tech-journey-label" style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">—</span></div>
+        <button class="btn-back" onclick="setMode('exec')">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6L8 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Visão geral
+        </button>
+      </div>
+      <div class="tech-body">
+        <div class="tech-arch" id="tech-arch"><div class="arch-heading">Arquitetura de Execução</div></div>
+        <div class="tech-detail">
+          <div class="tech-detail-tabs">
+            <button class="tech-tab active" onclick="switchTab('payload',this)">Payload</button>
+            <button class="tech-tab" onclick="switchTab('rules',this)">Regras &amp; Eventos</button>
+            <button class="tech-tab" onclick="switchTab('infra',this)">Infraestrutura</button>
+          </div>
+          <div class="tech-detail-body" id="tech-detail-body"><div style="color:var(--muted);font-size:11px;padding:16px 0">Selecione um componente para inspecionar.</div></div>
+        </div>
+        <div class="tech-log">
+          <div class="tech-log-head">
+            <span>Event Stream</span>
+            <div class="log-head-right"><span class="log-count" id="log-count-display">0</span><div class="log-live-dot"></div></div>
+          </div>
+          <div class="tech-log-stream" id="tech-log-stream"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT CARD (floating bottom-right, non-blocking) -->
+    <div id="result-screen">
+      <div id="result-card">
+        <div class="rc-inner">
+          <div class="rc-head">
+            <div class="rc-badge"><div class="rc-badge-dot"></div><span class="rc-badge-txt" id="rc-badge-txt">Operação concluída</span></div>
+            <button class="rc-close" onclick="closeResultCard()">Fechar resumo ✕</button>
+          </div>
+          <div class="rc-main">
+            <div><div class="rc-amount" id="rc-amount">R$ 250,00</div><div class="rc-dest" id="rc-dest">para João da Silva · Banco XYZ</div></div>
+            <div class="rc-check"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12L9 16L19 7" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="rc-meta">
+            <div class="rcm"><div class="rcm-label">Tempo</div><div class="rcm-val cf" id="rc-time">2,6s</div></div>
+            <div class="rcm"><div class="rcm-label">Camadas</div><div class="rcm-val ai" id="rc-layers">9</div></div>
+            <div class="rcm"><div class="rcm-label" id="rc-label3">BACEN/SPI</div><div class="rcm-val ok" id="rc-val3">ACSC</div></div>
+          </div>
+          <div class="rc-trace">Trace ID: <span id="rc-trace">TXN-A3F9-2E8C</span></div>
+          <div class="rc-actions">
+            <button class="rc-btn primary" onclick="exploreExecution()">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="1" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="7" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2"/></svg>
+              Explorar execução técnica
+            </button>
+            <div class="rc-row">
+              <button class="rc-btn ghost" onclick="reviewJourney()">Rever jornada</button>
+              <button class="rc-btn dl" id="rc-dl-btn" onclick="receiptAction()">Baixar comprovante</button>
+            </div>
+            <button class="rc-btn new-txn" onclick="novaTransacao()">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6a4 4 0 1 1 1 2.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 9V6h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Realizar nova transação
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="toast-msg">Comprovante gerado</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   JOURNEY DATA
+═══════════════════════════════════════════════════════ */
+const JOURNEYS = {
+
+/* ── PIX TRANSFER (9 steps, MCP merged into CoreFlow) ── */
+pix: {
+  label:'Transferência PIX', kicker:'PIX',
+  headline:'Uma mensagem para a Lia.<br><strong>Nove camadas em ação.</strong>',
+  sub:'Da conversa ao débito confirmado pelo BACEN — em milissegundos.',
+  badgeColor:'#a78bfa',
+  rc:{badge:'PIX realizado',amount:'R$ 250,00',dest:'para João da Silva · Banco XYZ',time:'2,4s',layers:'9',label3:'BACEN/SPI',val3:'ACSC',trace:'TXN-A3F9-2E8C',dl:'Baixar comprovante'},
+  steps:[
+    {id:'usr',icon:'💬',title:'Usuário solicita',detail:'O correntista enviou uma mensagem em linguagem natural. A Lia recebe pelo canal de chat. Nenhuma lógica bancária executada aqui — apenas captura, sanitização e autenticação de sessão.',pills:[{l:'Linguagem natural',c:''}],chat:'"Quero fazer um PIX de R$ 250 para João"',time:0,color:'#e5373a',tl:'Usuário / Canal',tt:'INPUT',tc:'#64748b',
+    inp:'{\n  "channel": "lia_chat",\n  "userId": "usr_9d4e7f2a",\n  "rawInput": "Quero fazer um PIX de R$ 250 para João"\n}',
+    out:'{\n  "inputId": "inp_a1b2c3",\n  "sanitized": true,\n  "forwardedTo": "lia_llm"\n}',
+    rules:['Entrada sanitizada — XSS e injection prevenidos','Rate limiting: 60 req/min por userId','Session token verificado no Redis','Cloud Armor WAF inspeciona o tráfego de entrada'],
+    infra:['Cloud Armor / WAF','API Gateway (GCP)','Cloud CDN'],
+    logs:[['00:00.000','USER_INPUT_RECEIVED',''],['00:00.060','WAF_VALIDATION_OK','Cloud Armor'],['00:00.080','SESSION_VERIFIED','sess_8f3a']]},
+
+    {id:'lia',icon:'🧠',title:'Lia interpreta',detail:'O modelo de linguagem classifica a intenção como pix_transfer (conf. 0.97), extrai entidades (valor, chave PIX) e solicita a operação. A Lia nunca acessa APIs bancárias diretamente — toda execução é controlada pela arquitetura.',pills:[{l:'IA',c:'ai'},{l:'Intenção detectada',c:''}],chat:null,time:160,color:'#a78bfa',tl:'Lia / LLM',tt:'IA',tc:'#a78bfa',
+    inp:'{\n  "model": "lia-v2-financial",\n  "temperature": 0.1,\n  "message": "Quero fazer um PIX de R$ 250 para João"\n}',
+    out:'{\n  "intent": "pix_transfer",\n  "confidence": 0.97,\n  "entities": {"amount": 250.00, "pixKey": "joao@banco.com"},\n  "requestedOperation": "execute_pix_transfer"\n}',
+    rules:['Lia interpreta — nunca executa operações bancárias diretamente','Confidence mínima de 0.85 para prosseguir','PII mascarado nos logs antes da persistência','Temperatura 0.1 — output determinístico e auditável'],
+    infra:['Vertex AI / Cloud Run','Cloud Logging (GCP)','Secret Manager — LLM API Keys'],
+    logs:[['00:00.130','LLM_INFERENCE_START','lia-v2-financial'],['00:00.245','INTENT_CLASSIFIED','pix_transfer conf=0.97'],['00:00.275','ENTITIES_EXTRACTED','amount=250'],['00:00.290','OPERATION_REQUESTED','execute_pix_transfer']]},
+
+    {id:'core',icon:'⚙️',title:'CoreFlow organiza',detail:'CoreFlow — o orquestrador central — valida a operação via MCP (Model Context Protocol), verifica saúde dos serviços, executa o engine de fraude, seleciona o BaaS (Flagship: Matera) e gera o Trace ID distribuído.',pills:[{l:'CoreFlow + MCP',c:'cf'},{l:'Matera selecionada',c:'highlight'}],chat:null,time:290,color:'#22d3ee',tl:'CoreFlow + MCP',tt:'ORQUESTRADOR',tc:'#22d3ee',
+    inp:'{\n  "operation": "pix_transfer",\n  "amount": 250.00,\n  "pixKey": "joao@banco.com",\n  "channel": "Lia"\n}',
+    out:'{\n  "traceId": "TXN-A3F9-2E8C",\n  "mcp": {\n    "toolResolved": "execute_pix_transfer@v2.1.0",\n    "scopeGranted": ["pix:write","account:read"],\n    "permissionGranted": true,\n    "mcpToken": "mcp_tok_7f2a3b"\n  },\n  "selectedBaaS": "Matera",\n  "fraudScore": 0.02,\n  "riskLevel": "LOW",\n  "route": ["security","bff","pix-svc","matera","bacen"]\n}',
+    rules:['MCP valida tool no catálogo — sem execução ad-hoc','MCP verifica scope e permissões do canal Lia','MCP token emitido com TTL de 30 segundos','Health check de todos os serviços antes de iniciar','Fraud score em tempo real — bloqueio automático se > 0.70','Flagship identificado: roteamento inteligente para Matera','Trace ID propagado em todas as camadas (W3C context)'],
+    infra:['Cloud Trace (GCP)','Pub/Sub — event bus','Cloud Monitoring','IAM — MCP authorization'],
+    logs:[['00:00.300','COREFLOW_RECEIVED','pix_transfer'],['00:00.330','MCP_TOOL_LOOKUP','execute_pix_transfer'],['00:00.360','MCP_SCOPE_VALIDATED','pix:write OK'],['00:00.385','TOOL_PERMISSION_GRANTED',''],['00:00.410','MCP_TOKEN_ISSUED','TTL=30s'],['00:00.540','HEALTH_CHECK_PASSED','4/4'],['00:00.645','FRAUD_SCORE','0.02 LOW'],['00:00.720','MATERA_FLOW_SELECTED',''],['00:00.845','TRACE_ID_PROPAGATED','TXN-A3F9-2E8C'],['00:00.860','ORCHESTRATION_ROUTE_DEFINED','5 hops']]},
+
+    {id:'sec',icon:'🔐',title:'Segurança e conformidade',detail:'Múltiplas proteções acionadas em paralelo: WAF, IAM, Secret Manager para PIN salt, mTLS via service mesh, JWT RS256, validação de PIN, rate limiting de débito e análise comportamental. Audit log imutável em Cloud Logging.',pills:[{l:'PIN verificado',c:'warn'},{l:'mTLS ativo',c:'cf'}],chat:null,time:280,color:'#fb923c',tl:'Segurança / Conformidade',tt:'SEGURANÇA',tc:'#fb923c',
+    inp:'{\n  "sessionId": "sess_8f3a2b1c",\n  "pinHash": "sha256+salt:a4f3b2e1...",\n  "jwtToken": "eyJhbGciOiJSUzI1NiJ9...",\n  "amount": 250.00,\n  "traceId": "TXN-A3F9-2E8C"\n}',
+    out:'{\n  "authLevel": "STRONG",\n  "wafClearance": "PASSED",\n  "jwtValid": true,\n  "pinValidation": "CORRECT",\n  "mtlsEstablished": true,\n  "rateLimit": "1/5 OK",\n  "clearance": "APPROVED"\n}',
+    rules:['WAF (Cloud Armor) inspeciona cada requisição','IAM valida service accounts entre serviços','Secret Manager: PIN salt nunca hardcoded','JWT RS256 — chave pública rotaciona a cada 24h','PIN validado via SHA-256+salt — nunca texto plano','mTLS obrigatório entre todos os serviços internos','Rate limit: máx 5 débitos/min por conta (Redis)','Audit log imutável em Cloud Logging (WORM)'],
+    infra:['Cloud Armor / WAF','Cloud IAM','Secret Manager','Cloud Logging — WORM','Service Mesh (Istio/mTLS)'],
+    logs:[['00:01.060','WAF_VALIDATION_OK','transaction layer'],['00:01.082','IAM_TOKEN_VERIFIED','svc-account OK'],['00:01.102','SECRET_MANAGER_ACCESS','PIN salt'],['00:01.148','MTLS_HANDSHAKE_OK','service mesh'],['00:01.200','AUTH_JWT_VALID','RS256 OK'],['00:01.256','PIN_VERIFIED','hash match'],['00:01.315','RATE_LIMIT_OK','1/5 window'],['00:01.382','AUDIT_LOG_REGISTERED','WORM'],['00:01.395','SECURITY_CLEARANCE','APPROVED']]},
+
+    {id:'bff',icon:'🔗',title:'BFF / APIs',detail:'O Backend For Frontend adapta o payload para o contrato do PIX Service v3, injeta headers de rastreamento distribuído, gera idempotency key e direciona para Matera.',pills:[{l:'BFF',c:'cf'},{l:'Rota Matera',c:'highlight'}],chat:null,time:120,color:'#60a5fa',tl:'BFF / API Layer',tt:'API',tc:'#60a5fa',
+    inp:'{\n  "traceId": "TXN-A3F9-2E8C",\n  "amount": 250.00,\n  "pixKey": "joao@banco.com",\n  "baasRoute": "matera"\n}',
+    out:'{\n  "method": "POST",\n  "url": "/internal/v3/pix/transfer",\n  "headers": {"X-Trace-ID": "TXN-A3F9-2E8C", "X-Idempotency-Key": "idm_TXN-A3F9"},\n  "timeout": 10000\n}',
+    rules:['Idempotency key = SHA256(traceId) — previne duplicação','Timeout de 10s; retry automático para 503/504','mTLS via service mesh','W3C Trace Context propagado nos headers'],
+    infra:['Cloud Run / GKE','Service Mesh (Istio)','Cloud Trace propagation'],
+    logs:[['00:01.402','BFF_PAYLOAD_ADAPTED','v3 contract'],['00:01.445','IDEMPOTENCY_KEY','idm_TXN-A3F9'],['00:01.480','FLAGSHIP_ROUTE','Matera selected'],['00:01.525','HTTP_REQUEST_SENT','POST /v3/pix']]},
+
+    {id:'baas',icon:'🏦',title:'BaaS processa',detail:'O Banking as a Service (Matera) valida automaticamente o saldo disponível, aplica políticas de limite e submete ao SPI do BACEN. O sistema valida tudo — sem interação do usuário.',pills:[{l:'Matera BaaS',c:'highlight'},{l:'Saldo validado',c:''}],chat:null,time:350,color:'#34d399',tl:'BaaS — Matera',tt:'BANKING',tc:'#34d399',
+    inp:'{\n  "endToEndId": "E60701190202501151432001",\n  "valor": "250.00",\n  "chave": "joao@banco.com",\n  "pagador": {"ispb": "60701190", "conta": "ACC-001"}\n}',
+    out:'{\n  "balanceCheck": "PASSED",\n  "limitCheck": "PASSED",\n  "spiSubmitted": true,\n  "baasTransactionId": "mat_txn_7f2a",\n  "processingTimeMs": 310\n}',
+    rules:['Saldo validado automaticamente','Limite diário e de frequência verificados','Idempotency key confirmada — sem duplicidade','BACEN/SPI acessado exclusivamente via BaaS'],
+    infra:['Matera Cloud Banking','Conexão segura com SPI BACEN'],
+    logs:[['00:01.842','BAAS_RECEIVED','mat_txn_7f2a'],['00:01.872','BALANCE_VALIDATED','OK'],['00:01.995','SPI_TRANSACTION_SUBMITTED','E60701190...']]},
+
+    {id:'bacen',icon:'🏛️',title:'Rede PIX / BACEN',detail:'O BACEN valida a chave no DICT, confirma os dados do destinatário e processa a liquidação no SPI. Status ACSC emitido — operação irrevogável por regulação BCB.',pills:[{l:'DICT validado',c:'pix'},{l:'SPI: ACSC',c:'highlight'}],chat:'"João da Silva — Banco XYZ — Chave validada ✓"',time:390,color:'#f472b6',tl:'BACEN / SPI / DICT',tt:'REGULATÓRIO',tc:'#f472b6',
+    inp:'{\n  "endToEndId": "E60701190202501151432001",\n  "dictQuery": "joao@banco.com",\n  "senderISPB": "60701190",\n  "receiverISPB": "09089356"\n}',
+    out:'{\n  "dictResult": {"name": "João da Silva", "bank": "Banco XYZ"},\n  "spiStatus": "ACSC",\n  "liquidationTs": "2025-01-15T14:32:02Z"\n}',
+    rules:['DICT consultado obrigatoriamente antes da execução','EndToEndId formato BACEN: E+ISPB+datetime','ACSC = liquidação irrevogável confirmada','PIX: até 10 segundos por regulação BCB 001/2020'],
+    infra:['BACEN SPI (infraestrutura federal)','DICT BACEN','Rede PIX (interoperabilidade nacional)'],
+    logs:[['00:02.102','DICT_QUERY_SENT','joao@banco.com'],['00:02.162','DICT_KEY_FOUND','João da Silva'],['00:02.392','SPI_CONFIRMED','ACSC'],['00:02.402','LIQUIDATION_IRREVOGAVEL','']]},
+
+    {id:'ret',icon:'↩️',title:'Retorno da operação',detail:'A confirmação do SPI percorre o caminho inverso. BaaS normaliza, DB atualizado de forma síncrona, notificações publicadas no Pub/Sub e CoreFlow consolida o resultado.',pills:[{l:'DB atualizado',c:''},{l:'Pub/Sub',c:'cf'}],chat:null,time:80,color:'#22d3ee',tl:'Retorno / Propagação',tt:'RETORNO',tc:'#22d3ee',
+    inp:'{\n  "status": "ACSC",\n  "baasTransactionId": "mat_txn_7f2a",\n  "traceId": "TXN-A3F9-2E8C"\n}',
+    out:'{\n  "status": "COMPLETED",\n  "dbUpdated": true,\n  "pubSubPublished": 3,\n  "totalLatencyMs": 2280\n}',
+    rules:['DB atualizado de forma síncrona antes do retorno','ACSC normalizado para COMPLETED','3 notificações publicadas: push, email, webhook','Latência registrada no Cloud Trace para SLA'],
+    infra:['Pub/Sub (GCP)','Cloud Spanner / Firestore','Cloud Logging'],
+    logs:[['00:02.418','RETURN_PROPAGATION','BaaS→CF'],['00:02.422','DB_UPDATED','COMPLETED sync'],['00:02.428','PUBSUB_PUBLISHED','3 msgs']]},
+
+    {id:'resp',icon:'✨',title:'Lia comunica',detail:'CoreFlow entrega à Lia apenas os campos marcados como seguros. A Lia gera a resposta em linguagem natural — sem acesso a dados bancários internos.',pills:[{l:'PIX realizado',c:'highlight'}],chat:'"PIX realizado! R$ 250,00 enviados para João da Silva. ✓"',time:50,color:'#a78bfa',tl:'Lia / Resposta',tt:'IA OUTPUT',tc:'#a78bfa',
+    inp:'{\n  "safeToExpose": {"status": "COMPLETED", "amount": 250.00, "recipientName": "João da Silva"},\n  "withheld": ["endToEndId","ispb","baasId","accountNumber"]\n}',
+    out:'{\n  "message": "PIX realizado! R$ 250,00 enviados para João da Silva.",\n  "totalMs": 2430,\n  "tokensUsed": 52\n}',
+    rules:['Lia recebe apenas campos marcados como safeToExpose','Dados bancários internos nunca chegam ao LLM','Temperatura 0.1 — resposta determinística','Lia interpreta e comunica — a arquitetura executou'],
+    infra:['Cloud Run — Lia runtime','Cloud Logging — response audit','Secret Manager — LLM API keys'],
+    logs:[['00:02.432','SAFE_DATA_DELIVERED','5 fields'],['00:02.448','LIA_RESPONSE_GENERATED','52 tokens'],['00:02.472','RESPONSE_DELIVERED','lia_chat'],['00:02.480','PIPELINE_COMPLETE','TXN-A3F9 2430ms ✓']]}
+  ],
+  logs:[
+    {ts:'00:00.000',ev:'CANAL_LIA_CONECTADO',cl:'c-ai'},
+    {ts:'00:00.060',ev:'WAF_VALIDATION_OK Cloud Armor',cl:'c-gcp'},
+    {ts:'00:00.080',ev:'USER_INPUT_RECEIVED',cl:''},
+    {ts:'00:00.130',ev:'LLM_INFERENCE_START lia-v2',cl:'c-ai'},
+    {ts:'00:00.245',ev:'INTENT_CLASSIFIED pix_transfer 0.97',cl:'c-ai'},
+    {ts:'00:00.300',ev:'COREFLOW_RECEIVED pix_transfer',cl:'c-cf'},
+    {ts:'00:00.330',ev:'MCP_TOOL_LOOKUP execute_pix_transfer',cl:'c-cf'},
+    {ts:'00:00.360',ev:'MCP_SCOPE_VALIDATED pix:write OK',cl:'c-cf'},
+    {ts:'00:00.385',ev:'TOOL_PERMISSION_GRANTED',cl:'c-cf'},
+    {ts:'00:00.410',ev:'MCP_TOKEN_ISSUED TTL=30s',cl:'c-cf'},
+    {ts:'00:00.540',ev:'HEALTH_CHECK_PASSED 4/4',cl:'c-cf'},
+    {ts:'00:00.645',ev:'FRAUD_SCORE 0.02 LOW',cl:'c-cf'},
+    {ts:'00:00.720',ev:'MATERA_FLOW_SELECTED',cl:'c-cf'},
+    {ts:'00:00.845',ev:'TRACE_ID_PROPAGATED TXN-A3F9',cl:'c-gcp'},
+    {ts:'00:00.860',ev:'ORCHESTRATION_ROUTE_DEFINED',cl:'c-cf'},
+    {ts:'00:01.060',ev:'WAF_VALIDATION_OK transaction layer',cl:'c-gcp'},
+    {ts:'00:01.082',ev:'IAM_TOKEN_VERIFIED svc-account',cl:'c-gcp'},
+    {ts:'00:01.102',ev:'SECRET_MANAGER_ACCESS PIN salt',cl:'c-gcp'},
+    {ts:'00:01.148',ev:'MTLS_HANDSHAKE_OK service mesh',cl:'c-sec'},
+    {ts:'00:01.200',ev:'AUTH_JWT_VALID RS256',cl:'c-sec'},
+    {ts:'00:01.256',ev:'PIN_VERIFIED hash match',cl:'c-sec'},
+    {ts:'00:01.315',ev:'RATE_LIMIT_OK 1/5 window',cl:'c-sec'},
+    {ts:'00:01.395',ev:'SECURITY_CLEARANCE APPROVED',cl:'c-sec'},
+    {ts:'00:01.402',ev:'BFF_PAYLOAD_ADAPTED v3 contract',cl:'c-api'},
+    {ts:'00:01.480',ev:'FLAGSHIP_ROUTE Matera',cl:'c-api'},
+    {ts:'00:01.525',ev:'HTTP_REQUEST_SENT POST /v3/pix',cl:'c-api'},
+    {ts:'00:01.842',ev:'BAAS_RECEIVED mat_txn_7f2a',cl:''},
+    {ts:'00:01.872',ev:'BALANCE_VALIDATED OK',cl:''},
+    {ts:'00:01.995',ev:'SPI_TRANSACTION_SUBMITTED E60701190',cl:'c-pix'},
+    {ts:'00:02.102',ev:'DICT_QUERY_SENT joao@banco.com',cl:'c-pix'},
+    {ts:'00:02.162',ev:'DICT_KEY_FOUND João da Silva',cl:'c-pix'},
+    {ts:'00:02.392',ev:'SPI_CONFIRMED ACSC',cl:'c-ok'},
+    {ts:'00:02.402',ev:'LIQUIDATION_IRREVOGAVEL',cl:'c-ok'},
+    {ts:'00:02.422',ev:'DB_UPDATED COMPLETED sync',cl:'c-cf'},
+    {ts:'00:02.428',ev:'PUBSUB_PUBLISHED 3 msgs',cl:'c-gcp'},
+    {ts:'00:02.448',ev:'LIA_RESPONSE_GENERATED 52 tokens',cl:'c-ai'},
+    {ts:'00:02.480',ev:'PIPELINE_COMPLETE TXN-A3F9 2430ms ✓',cl:'c-ok'},
+  ]
+},
+
+/* ── PIX KEY LOOKUP (7 steps) ── */
+key: {
+  label:'Consulta de Chave PIX', kicker:'CHAVE PIX',
+  headline:'Uma pergunta à Lia.<br><strong>BACEN responde em milissegundos.</strong>',
+  sub:'A chave PIX é validada no DICT/BACEN — sem execução de transação financeira.',
+  badgeColor:'#f472b6',
+  rc:{badge:'Chave validada',amount:'João da Silva',dest:'Banco XYZ · joao@banco.com',time:'1,1s',layers:'7',label3:'DICT',val3:'VALID',trace:'QRY-B7C2-1A4F',dl:'Copiar resumo'},
+  steps:[
+    {id:'usr',icon:'💬',title:'Usuário solicita',detail:'O correntista pergunta sobre uma chave PIX em linguagem natural.',pills:[{l:'Linguagem natural',c:''}],chat:'"Quem é o dono da chave joao@banco.com?"',time:0,color:'#e5373a',tl:'Usuário / Canal',tt:'INPUT',tc:'#64748b',
+    inp:'{\n  "channel": "lia_chat",\n  "rawInput": "Quem é o dono da chave joao@banco.com?"\n}',
+    out:'{\n  "inputId": "inp_b2c3d4",\n  "sanitized": true,\n  "forwardedTo": "lia_llm"\n}',
+    rules:['Entrada sanitizada','Session verificado','WAF inspeciona tráfego'],
+    infra:['Cloud Armor / WAF','API Gateway'],
+    logs:[['00:00.000','USER_INPUT_RECEIVED',''],['00:00.060','WAF_VALIDATION_OK','']]},
+    {id:'lia',icon:'🧠',title:'Lia interpreta',detail:'Classifica intenção como pix_key_lookup (conf. 0.95) e solicita a operação ao CoreFlow. A Lia não acessa o BACEN diretamente.',pills:[{l:'IA',c:'ai'},{l:'Consulta detectada',c:''}],chat:null,time:150,color:'#a78bfa',tl:'Lia / LLM',tt:'IA',tc:'#a78bfa',
+    inp:'{\n  "model": "lia-v2-financial",\n  "message": "Quem é o dono da chave joao@banco.com?"\n}',
+    out:'{\n  "intent": "pix_key_lookup",\n  "confidence": 0.95,\n  "entities": {"pixKey": "joao@banco.com"},\n  "requestedOperation": "lookup_pix_key"\n}',
+    rules:['Operação de leitura — sem débito','BACEN não acessado diretamente pela Lia'],
+    infra:['Vertex AI','Cloud Logging'],
+    logs:[['00:00.130','LLM_INFERENCE_START',''],['00:00.255','INTENT_CLASSIFIED','pix_key_lookup 0.95']]},
+    {id:'core',icon:'⚙️',title:'CoreFlow organiza',detail:'CoreFlow valida via MCP (scope pix:read), verifica dependências DICT/BACEN e define rota: BFF → BaaS → DICT.',pills:[{l:'CoreFlow + MCP',c:'cf'},{l:'BACEN requerido',c:'pix'}],chat:null,time:230,color:'#22d3ee',tl:'CoreFlow + MCP',tt:'ORQUESTRADOR',tc:'#22d3ee',
+    inp:'{\n  "operation": "pix_key_lookup",\n  "pixKey": "joao@banco.com"\n}',
+    out:'{\n  "traceId": "QRY-B7C2-1A4F",\n  "mcp": {\n    "toolResolved": "lookup_pix_key@v1.3.0",\n    "scopeGranted": ["pix:read"],\n    "permissionGranted": true\n  },\n  "route": ["security","bff","baas","dict_bacen"],\n  "bacenRequired": true\n}',
+    rules:['MCP valida tool lookup_pix_key — scope pix:read','Sem pix:write — leitura apenas','BACEN requerido para consulta de chave PIX','Trace ID gerado para rastreabilidade'],
+    infra:['Cloud Trace','Pub/Sub','IAM — MCP'],
+    logs:[['00:00.302','COREFLOW_RECEIVED','pix_key_lookup'],['00:00.330','MCP_TOOL_LOOKUP','lookup_pix_key'],['00:00.355','MCP_SCOPE_VALIDATED','pix:read'],['00:00.392','TOOL_PERMISSION_GRANTED',''],['00:00.545','ORCHESTRATION_ROUTE_DEFINED','bff→baas→dict']]},
+    {id:'sec',icon:'🔐',title:'Segurança e conformidade',detail:'Validações de segurança para operação de leitura: WAF, IAM, JWT, mTLS e scope pix:read confirmado. Sem PIN — operação não envolve débito.',pills:[{l:'Session validada',c:'warn'},{l:'mTLS ativo',c:'cf'}],chat:null,time:180,color:'#fb923c',tl:'Segurança / Conformidade',tt:'SEGURANÇA',tc:'#fb923c',
+    inp:'{\n  "sessionId": "sess_8f3a2b1c",\n  "jwtToken": "eyJhbGciOiJSUzI1NiJ9...",\n  "scope": "pix:read",\n  "traceId": "QRY-B7C2-1A4F"\n}',
+    out:'{\n  "wafClearance": "PASSED",\n  "jwtValid": true,\n  "scopeConfirmed": "pix:read",\n  "mtlsEstablished": true,\n  "noDebitPermission": true,\n  "clearance": "APPROVED"\n}',
+    rules:['WAF (Cloud Armor) inspeciona a requisição','IAM valida service accounts','JWT RS256 verificado','mTLS obrigatório entre serviços','Scope pix:read confirmado — sem débito','PIN não requerido para operação de leitura','Audit log imutável em Cloud Logging'],
+    infra:['Cloud Armor / WAF','Cloud IAM','Cloud Logging — WORM','Service Mesh (mTLS)'],
+    logs:[['00:00.905','WAF_VALIDATION_OK',''],['00:00.920','IAM_TOKEN_VERIFIED',''],['00:00.940','MTLS_HANDSHAKE_OK',''],['00:00.955','JWT_VALID','RS256 OK'],['00:00.970','SCOPE_CONFIRMED','pix:read no-debit'],['00:00.985','SECURITY_CLEARANCE','APPROVED']]},
+    {id:'bff',icon:'🔗',title:'BFF comunica com BaaS',detail:'O BFF adapta a consulta para o contrato do serviço de lookup PIX e encaminha ao BaaS.',pills:[{l:'BFF',c:'cf'}],chat:null,time:100,color:'#60a5fa',tl:'BFF / API Layer',tt:'API',tc:'#60a5fa',
+    inp:'{\n  "queryType": "PIX_KEY_LOOKUP",\n  "pixKey": "joao@banco.com",\n  "traceId": "QRY-B7C2-1A4F"\n}',
+    out:'{\n  "method": "GET",\n  "url": "/internal/v2/pix/key?key=joao@banco.com"\n}',
+    rules:['mTLS entre serviços','GET — sem idempotency necessária'],
+    infra:['Cloud Run','Service Mesh'],
+    logs:[['00:01.005','BFF_QUERY_ADAPTED','GET /v2/pix/key'],['00:01.048','HTTP_REQUEST_SENT','']]},
+    {id:'dict',icon:'🏛️',title:'DICT / BACEN consulta',detail:'O BaaS consulta o DICT do BACEN. Apenas validação e identificação do titular — sem transação financeira. BACEN responde com os dados do destinatário.',pills:[{l:'DICT consultado',c:'pix'},{l:'Sem transação',c:'warn'}],chat:'"João da Silva — Banco XYZ — Chave ativa ✓"',time:280,color:'#f472b6',tl:'DICT BACEN',tt:'REGULATÓRIO',tc:'#f472b6',
+    inp:'{\n  "dictQuery": "joao@banco.com"\n}',
+    out:'{\n  "keyFound": true,\n  "holderName": "João da Silva",\n  "bank": "Banco XYZ",\n  "ispb": "09089356",\n  "keyStatus": "ACTIVE"\n}',
+    rules:['DICT — identificação sem transação financeira','Chave deve estar ACTIVE','Dados do titular são autoritativos'],
+    infra:['BACEN DICT (infraestrutura federal)'],
+    logs:[['00:01.102','DICT_QUERY_SENT','joao@banco.com'],['00:01.202','DICT_KEY_FOUND','João da Silva'],['00:01.382','DICT_RESPONSE_OK','ACTIVE']]},
+    {id:'resp',icon:'✨',title:'Lia comunica',detail:'CoreFlow entrega dados do DICT sanitizados à Lia, que gera a resposta sem expor dados internos.',pills:[{l:'Chave validada',c:'highlight'}],chat:'"João da Silva — Banco XYZ. Chave ativa."',time:40,color:'#a78bfa',tl:'Lia / Resposta',tt:'IA OUTPUT',tc:'#a78bfa',
+    inp:'{\n  "safeToExpose": {"holderName": "João da Silva", "bank": "Banco XYZ", "status": "ACTIVE"}\n}',
+    out:'{\n  "message": "João da Silva — Banco XYZ. Chave ativa.",\n  "totalMs": 1100\n}',
+    rules:['ISPB e dados internos não expostos ao LLM','Temperatura 0.1 — determinística'],
+    infra:['Cloud Run — Lia runtime'],
+    logs:[['00:01.060','SAFE_DATA_DELIVERED','holder+bank'],['00:01.080','LIA_RESPONSE_GENERATED',''],['00:01.100','PIPELINE_COMPLETE','QRY-B7C2 1100ms ✓']]}
+  ],
+  logs:[
+    {ts:'00:00.000',ev:'USER_INPUT_RECEIVED',cl:''},
+    {ts:'00:00.060',ev:'WAF_VALIDATION_OK',cl:'c-gcp'},
+    {ts:'00:00.130',ev:'LLM_INFERENCE_START',cl:'c-ai'},
+    {ts:'00:00.255',ev:'INTENT_CLASSIFIED pix_key_lookup 0.95',cl:'c-ai'},
+    {ts:'00:00.302',ev:'COREFLOW_RECEIVED pix_key_lookup',cl:'c-cf'},
+    {ts:'00:00.330',ev:'MCP_TOOL_LOOKUP lookup_pix_key',cl:'c-cf'},
+    {ts:'00:00.355',ev:'MCP_SCOPE_VALIDATED pix:read',cl:'c-cf'},
+    {ts:'00:00.392',ev:'TOOL_PERMISSION_GRANTED',cl:'c-cf'},
+    {ts:'00:00.545',ev:'ORCHESTRATION_ROUTE_DEFINED bff→dict',cl:'c-cf'},
+    {ts:'00:00.905',ev:'WAF_VALIDATION_OK request layer',cl:'c-gcp'},
+    {ts:'00:00.955',ev:'JWT_VALID RS256 OK',cl:'c-sec'},
+    {ts:'00:00.970',ev:'SCOPE_CONFIRMED pix:read no-debit',cl:'c-sec'},
+    {ts:'00:00.985',ev:'SECURITY_CLEARANCE APPROVED',cl:'c-sec'},
+    {ts:'00:01.005',ev:'BFF_QUERY_ADAPTED GET /v2/pix/key',cl:'c-api'},
+    {ts:'00:01.102',ev:'DICT_QUERY_SENT joao@banco.com',cl:'c-pix'},
+    {ts:'00:01.202',ev:'DICT_KEY_FOUND João da Silva',cl:'c-pix'},
+    {ts:'00:01.382',ev:'DICT_RESPONSE_OK ACTIVE',cl:'c-ok'},
+    {ts:'00:01.080',ev:'LIA_RESPONSE_GENERATED',cl:'c-ai'},
+    {ts:'00:01.100',ev:'PIPELINE_COMPLETE QRY-B7C2 1100ms ✓',cl:'c-ok'},
+  ]
+},
+
+/* ── BALANCE CHECK (7 steps) ── */
+balance: {
+  label:'Consulta de Saldo', kicker:'SALDO',
+  headline:'Uma pergunta simples.<br><strong>BaaS responde. BACEN não participa.</strong>',
+  sub:'Saldo pertence ao BaaS — BACEN e DICT não são envolvidos nesta operação.',
+  badgeColor:'#34d399',
+  rc:{badge:'Saldo consultado',amount:'R$ 4.872,30',dest:'Conta Corrente · Lia by Diletta',time:'0,7s',layers:'7',label3:'BaaS',val3:'OK',trace:'BAL-C1D4-9F2A',dl:'Copiar resumo'},
+  steps:[
+    {id:'usr',icon:'💬',title:'Usuário solicita',detail:'O correntista pergunta sobre o saldo da conta em linguagem natural.',pills:[{l:'Linguagem natural',c:''}],chat:'"Qual é o meu saldo atual?"',time:0,color:'#e5373a',tl:'Usuário / Canal',tt:'INPUT',tc:'#64748b',
+    inp:'{\n  "channel": "lia_chat",\n  "rawInput": "Qual é o meu saldo atual?"\n}',
+    out:'{\n  "inputId": "inp_c3d4e5",\n  "forwardedTo": "lia_llm"\n}',
+    rules:['Entrada sanitizada','Session verificado','BACEN não envolvido'],
+    infra:['Cloud Armor','API Gateway'],
+    logs:[['00:00.000','USER_INPUT_RECEIVED',''],['00:00.060','SESSION_VERIFIED','']]},
+    {id:'lia',icon:'🧠',title:'Lia interpreta',detail:'Classifica intenção como account_balance_check (conf. 0.99). Sem PIX ou BACEN.',pills:[{l:'IA',c:'ai'},{l:'Saldo detectado',c:''}],chat:null,time:130,color:'#a78bfa',tl:'Lia / LLM',tt:'IA',tc:'#a78bfa',
+    inp:'{\n  "model": "lia-v2-financial",\n  "message": "Qual é o meu saldo atual?"\n}',
+    out:'{\n  "intent": "account_balance_check",\n  "confidence": 0.99,\n  "requestedOperation": "get_account_balance"\n}',
+    rules:['Operação de leitura — sem débito','BACEN não requerido para saldo'],
+    infra:['Vertex AI','Cloud Logging'],
+    logs:[['00:00.130','LLM_INFERENCE_START',''],['00:00.225','INTENT_CLASSIFIED','account_balance 0.99']]},
+    {id:'core',icon:'⚙️',title:'CoreFlow organiza',detail:'CoreFlow valida via MCP (scope account:read), verifica que BACEN não é necessário e roteia diretamente para BFF → BaaS.',pills:[{l:'CoreFlow + MCP',c:'cf'},{l:'Sem BACEN',c:'warn'}],chat:null,time:220,color:'#22d3ee',tl:'CoreFlow + MCP',tt:'ORQUESTRADOR',tc:'#22d3ee',
+    inp:'{\n  "operation": "account_balance_check",\n  "userId": "usr_9d4e7f2a"\n}',
+    out:'{\n  "traceId": "BAL-C1D4-9F2A",\n  "mcp": {\n    "toolResolved": "get_account_balance@v2.0.0",\n    "scopeGranted": ["account:read","balance:read"],\n    "permissionGranted": true\n  },\n  "route": ["security","bff","baas"],\n  "bacenRequired": false\n}',
+    rules:['MCP valida scope account:read','Sem pix:write — leitura pura','BACEN não requerido — saldo é dado do BaaS','Rota simplificada: security → BFF → BaaS'],
+    infra:['Cloud Trace','Pub/Sub','IAM — MCP'],
+    logs:[['00:00.285','COREFLOW_RECEIVED','account_balance'],['00:00.295','MCP_SCOPE_VALIDATED','account:read'],['00:00.310','TOOL_PERMISSION_GRANTED',''],['00:00.402','BACEN_NOT_REQUIRED','balance=BaaS'],['00:00.412','ORCHESTRATION_ROUTE_DEFINED','bff→baas']]},
+    {id:'sec',icon:'🔐',title:'Segurança e conformidade',detail:'Validações de segurança para consulta de saldo: WAF, IAM, JWT, mTLS e scope account:read/balance:read confirmados. Sem PIN, sem BACEN, sem escopo de débito.',pills:[{l:'Session validada',c:'warn'},{l:'mTLS ativo',c:'cf'}],chat:null,time:160,color:'#fb923c',tl:'Segurança / Conformidade',tt:'SEGURANÇA',tc:'#fb923c',
+    inp:'{\n  "sessionId": "sess_8f3a2b1c",\n  "jwtToken": "eyJhbGciOiJSUzI1NiJ9...",\n  "scope": ["account:read","balance:read"],\n  "traceId": "BAL-C1D4-9F2A"\n}',
+    out:'{\n  "wafClearance": "PASSED",\n  "jwtValid": true,\n  "scopeConfirmed": ["account:read","balance:read"],\n  "mtlsEstablished": true,\n  "noDebitPermission": true,\n  "noBacen": true,\n  "clearance": "APPROVED"\n}',
+    rules:['WAF (Cloud Armor) inspeciona a requisição','IAM valida service accounts','JWT RS256 verificado','mTLS obrigatório entre serviços','Scope account:read + balance:read — sem pix:write','Sem autorização de débito','BACEN não envolvido neste fluxo','Audit log registrado em Cloud Logging'],
+    infra:['Cloud Armor / WAF','Cloud IAM','Cloud Logging','Service Mesh (mTLS)'],
+    logs:[['00:00.550','WAF_VALIDATION_OK',''],['00:00.562','IAM_TOKEN_VERIFIED',''],['00:00.572','MTLS_HANDSHAKE_OK',''],['00:00.580','JWT_VALID','RS256 OK'],['00:00.588','SCOPE_CONFIRMED','account:read no-debit'],['00:00.595','SECURITY_CLEARANCE','APPROVED']]},
+    {id:'bff',icon:'🔗',title:'BFF comunica com BaaS',detail:'O BFF envia a consulta de saldo diretamente ao BaaS Matera. Sem DICT, sem SPI, sem BACEN.',pills:[{l:'BFF',c:'cf'},{l:'Sem BACEN',c:'warn'}],chat:null,time:90,color:'#60a5fa',tl:'BFF / API Layer',tt:'API',tc:'#60a5fa',
+    inp:'{\n  "queryType": "BALANCE_CHECK",\n  "accountId": "ACC-001",\n  "traceId": "BAL-C1D4-9F2A"\n}',
+    out:'{\n  "method": "GET",\n  "url": "/internal/v2/account/balance?accountId=ACC-001"\n}',
+    rules:['mTLS entre serviços','GET — sem idempotency','Nenhuma interação com BACEN'],
+    infra:['Cloud Run','Service Mesh'],
+    logs:[['00:00.655','BFF_REQUEST_SENT','GET /v2/account/balance']]},
+    {id:'baas',icon:'🏦',title:'BaaS retorna saldo',detail:'O BaaS Matera retorna o saldo disponível da conta. Sem comunicação com BACEN, SPI ou DICT.',pills:[{l:'Saldo disponível',c:'highlight'},{l:'Sem BACEN',c:'warn'}],chat:null,time:60,color:'#34d399',tl:'BaaS — Matera',tt:'BANKING',tc:'#34d399',
+    inp:'{\n  "accountId": "ACC-001",\n  "queryType": "BALANCE_CHECK"\n}',
+    out:'{\n  "availableBalance": 4872.30,\n  "currency": "BRL",\n  "lastUpdated": "2025-01-15T14:32:00Z"\n}',
+    rules:['Saldo retornado exclusivamente pelo BaaS','BACEN não envolvido','Dado de saldo pertence ao BaaS — não ao SPI'],
+    infra:['Matera Cloud Banking'],
+    logs:[['00:00.682','BAAS_BALANCE_RETURNED','4872.30 BRL']]},
+    {id:'resp',icon:'✨',title:'Lia comunica',detail:'CoreFlow entrega o saldo sanitizado à Lia. BACEN não participou. Tempo total: ~0.7s.',pills:[{l:'Saldo consultado',c:'highlight'},{l:'Sem BACEN',c:'warn'}],chat:'"Seu saldo disponível é R$ 4.872,30."',time:30,color:'#a78bfa',tl:'Lia / Resposta',tt:'IA OUTPUT',tc:'#a78bfa',
+    inp:'{\n  "safeToExpose": {"availableBalance": 4872.30, "currency": "BRL"}\n}',
+    out:'{\n  "message": "Seu saldo disponível é R$ 4.872,30.",\n  "totalMs": 700\n}',
+    rules:['Saldo retornado exclusivamente pelo BaaS','BACEN não envolvido','Dados sanitizados antes do LLM'],
+    infra:['Cloud Run — Lia runtime'],
+    logs:[['00:00.692','SAFE_DATA_DELIVERED','balance'],['00:00.700','LIA_RESPONSE_GENERATED',''],['00:00.700','PIPELINE_COMPLETE','BAL-C1D4 700ms ✓']]}
+  ],
+  logs:[
+    {ts:'00:00.000',ev:'USER_INPUT_RECEIVED',cl:''},
+    {ts:'00:00.060',ev:'SESSION_VERIFIED',cl:''},
+    {ts:'00:00.130',ev:'LLM_INFERENCE_START',cl:'c-ai'},
+    {ts:'00:00.225',ev:'INTENT_CLASSIFIED account_balance 0.99',cl:'c-ai'},
+    {ts:'00:00.285',ev:'COREFLOW_RECEIVED account_balance',cl:'c-cf'},
+    {ts:'00:00.295',ev:'MCP_SCOPE_VALIDATED account:read',cl:'c-cf'},
+    {ts:'00:00.310',ev:'TOOL_PERMISSION_GRANTED',cl:'c-cf'},
+    {ts:'00:00.402',ev:'BACEN_NOT_REQUIRED balance=BaaS only',cl:'c-cf'},
+    {ts:'00:00.412',ev:'ORCHESTRATION_ROUTE_DEFINED bff→baas',cl:'c-cf'},
+    {ts:'00:00.550',ev:'WAF_VALIDATION_OK',cl:'c-gcp'},
+    {ts:'00:00.572',ev:'MTLS_HANDSHAKE_OK',cl:'c-sec'},
+    {ts:'00:00.588',ev:'SCOPE_CONFIRMED account:read no-debit',cl:'c-sec'},
+    {ts:'00:00.595',ev:'SECURITY_CLEARANCE APPROVED',cl:'c-sec'},
+    {ts:'00:00.655',ev:'BFF_REQUEST_SENT GET /v2/account/balance',cl:'c-api'},
+    {ts:'00:00.682',ev:'BAAS_BALANCE_RETURNED 4872.30 BRL',cl:''},
+    {ts:'00:00.692',ev:'SAFE_DATA_DELIVERED',cl:'c-ai'},
+    {ts:'00:00.700',ev:'LIA_RESPONSE_GENERATED',cl:'c-ai'},
+    {ts:'00:00.700',ev:'PIPELINE_COMPLETE BAL-C1D4 700ms ✓',cl:'c-ok'},
+  ]
+}
+};
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let journey=null, STEPS=[], ALL_LOGS=[];
+let currentStep=-1, playing=false, playTimer=null, started=false;
+let currentMode='exec', selectedTechNode=0, currentTab='payload';
+let liveLogIndex=0, liveLogTimer=null, liveEvtCount=0;
+const STEP_DURATION=1400;
+
+/* ═══════════════════════════════════════
+   RESET RUNTIME STATE
+═══════════════════════════════════════ */
+function resetRuntimeState() {
+  clearTimeout(playTimer); clearTimeout(liveLogTimer);
+  playing=false; started=false; currentStep=-1;
+  liveLogIndex=0; liveEvtCount=0;
+
+  // hide result card
+  const rc=document.getElementById('result-card');
+  rc.classList.remove('visible');
+
+  // reset UI counters
+  document.getElementById('live-evt-count').textContent='0';
+  document.getElementById('log-count-display').textContent='0';
+
+  // clear log stream
+  document.getElementById('tech-log-stream').innerHTML='';
+
+  // reset progress
+  document.getElementById('progress-fill').style.width='0';
+  document.getElementById('play-step-label').textContent='Iniciando...';
+
+  // clear steps-all-done glow
+  document.getElementById('steps-row').classList.remove('steps-all-done');
+
+  // hide focus card
+  document.getElementById('focus-card').classList.remove('visible');
+  document.getElementById('focus-card').style.borderColor='';
+
+  // reset play icon
+  updatePlayIcon();
+
+  // clear all step states and connectors (if STEPS populated)
+  STEPS.forEach((_,idx)=>{
+    const el=document.getElementById(`step-${idx}`);
+    if(el) el.classList.remove('st-active','st-done');
+    const f=document.getElementById(`conn-fill-${idx}`);
+    if(f){f.style.transition='none';f.style.width='0';f.style.background='linear-gradient(90deg,var(--red),var(--ai))';}
+    const ms=document.getElementById(`arch-ms-${idx}`);
+    if(ms) ms.classList.remove('running','done');
+  });
+}
+
+/* ═══════════════════════════════════════
+   JOURNEY SELECTION
+═══════════════════════════════════════ */
+function selectJourney(type) {
+  resetRuntimeState();
+  journey=JOURNEYS[type]; STEPS=journey.steps; ALL_LOGS=journey.logs;
+
+  // hide selector
+  document.getElementById('journey-selector').classList.add('hidden');
+
+  // update header & hero
+  document.getElementById('hdr-title').textContent='Arquitetura Viva — '+journey.label;
+  document.getElementById('journey-kicker').textContent=journey.kicker;
+  document.getElementById('exec-headline').innerHTML=journey.headline;
+  document.getElementById('exec-sub').textContent=journey.sub;
+  document.getElementById('badge-label').textContent=journey.label;
+  document.getElementById('badge-dot').style.background=journey.badgeColor;
+  document.getElementById('tech-journey-label').textContent=journey.label;
+  document.getElementById('live-counter').style.display='flex';
+
+  // build UI for this journey
+  buildPipeline(); buildTechArch();
+
+  // show playbar and focus card, then auto-start
+  setTimeout(()=>{
+    document.getElementById('playbar').classList.remove('hidden');
+    document.getElementById('focus-card').classList.add('visible');
+    startJourney();
+  },500);
+}
+
+function goToSelector() {
+  resetRuntimeState();
+  document.getElementById('journey-selector').classList.remove('hidden');
+  document.getElementById('playbar').classList.add('hidden');
+  document.getElementById('live-counter').style.display='none';
+  if(currentMode!=='exec') setMode('exec');
+}
+
+/* ═══════════════════════════════════════
+   BUILD PIPELINE & TECH ARCH
+═══════════════════════════════════════ */
+function buildPipeline() {
+  const row=document.getElementById('steps-row'); row.innerHTML='';
+  STEPS.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='step'; div.id=`step-${i}`; div.onclick=()=>jumpToStep(i);
+    div.innerHTML=`<div class="step-node"><span style="font-size:17px">${s.icon}</span><div class="step-num">${i+1}</div></div><div class="step-title">${s.title}</div>`;
+    row.appendChild(div);
+    if(i<STEPS.length-1){
+      const conn=document.createElement('div');
+      conn.className='step-conn'; conn.id=`conn-${i}`;
+      conn.innerHTML=`<div class="step-conn-fill" id="conn-fill-${i}"></div><div class="step-conn-pulse" id="conn-pulse-${i}"></div>`;
+      row.appendChild(conn);
+    }
+  });
+}
+
+function buildTechArch() {
+  const arch=document.getElementById('tech-arch');
+  arch.innerHTML='<div class="arch-heading">Arquitetura de Execução</div>';
+  STEPS.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='arch-node'; div.id=`arch-${i}`; div.onclick=()=>selectTechNode(i);
+    div.innerHTML=`<div class="arch-dot" style="background:${s.tc};color:${s.tc}"></div><div><div class="arch-name" id="arch-name-${i}">${s.tl}</div><div class="arch-type">${s.tt}</div></div><div class="arch-ms" id="arch-ms-${i}">+${s.time}ms</div>`;
+    arch.appendChild(div);
+    if(i<STEPS.length-1){const arr=document.createElement('div');arr.className='arch-arrow';arr.textContent='↓';arch.appendChild(arr);}
+  });
+  selectTechNode(0);
+}
+
+function selectTechNode(idx) {
+  selectedTechNode=idx;
+  document.querySelectorAll('.arch-node').forEach((n,i)=>{
+    n.classList.toggle('selected',i===idx);
+    const nm=document.getElementById(`arch-name-${i}`);
+    if(nm) nm.style.color=i===idx?STEPS[i].tc:'';
+  });
+  renderTechDetail(idx);
+}
+
+function switchTab(tab,el) {
+  currentTab=tab;
+  document.querySelectorAll('.tech-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTechDetail(selectedTechNode);
+}
+
+function renderTechDetail(idx) {
+  const s=STEPS[idx]; const body=document.getElementById('tech-detail-body');
+  if(currentTab==='payload'){
+    body.innerHTML=`<div class="payload-block"><div class="payload-label"><span>Input Payload</span><span style="color:var(--muted)">${s.tl}</span></div><div class="payload-body">${colorize(s.inp)}</div></div><div class="payload-block"><div class="payload-label"><span>Output Payload</span></div><div class="payload-body">${colorize(s.out)}</div></div>`;
+  } else if(currentTab==='rules'){
+    const rules=s.rules.map(r=>`<div class="rule-item"><span class="rule-check">✓</span><span>${r}</span></div>`).join('');
+    const evts=s.logs.map(l=>`<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:7.5px"><span style="color:var(--dim)">[${l[0]}]</span><span style="color:var(--muted)">${l[1]}</span></div>`).join('');
+    body.innerHTML=`<div class="rule-list" style="margin-bottom:12px">${rules}</div><div class="payload-label" style="margin-bottom:5px"><span>Eventos Gerados</span></div><div>${evts}</div>`;
+  } else {
+    const tags=(s.infra||[]).map(t=>`<span class="infra-tag">${t}</span>`).join('');
+    body.innerHTML=`<div class="infra-section"><div class="infra-title">Google Cloud Platform</div><div class="infra-tags">${tags||'<span style="color:var(--muted);font-size:10px">Infraestrutura interna</span>'}</div></div>`;
+  }
+}
+
+/* ═══════════════════════════════════════
+   LIVE LOG STREAMING
+═══════════════════════════════════════ */
+function streamNextLog() {
+  if(liveLogIndex>=ALL_LOGS.length) return;
+  const log=ALL_LOGS[liveLogIndex++];
+  liveEvtCount++;
+  document.getElementById('live-evt-count').textContent=liveEvtCount;
+  document.getElementById('log-count-display').textContent=liveEvtCount;
+  const stream=document.getElementById('tech-log-stream');
+  const div=document.createElement('div');
+  div.className=`log-line ${log.cl} fresh`;
+  div.innerHTML=`<div class="log-ts">[${log.ts}]</div><div class="log-ev">${log.ev}</div>`;
+  stream.appendChild(div); stream.scrollTop=stream.scrollHeight;
+  const si=Math.min(Math.floor((liveLogIndex-1)/ALL_LOGS.length*STEPS.length),STEPS.length-1);
+  const n=document.getElementById(`arch-${si}`);
+  if(n){n.classList.add('arch-live');setTimeout(()=>n.classList.remove('arch-live'),600);}
+}
+
+function scheduleLiveLog(delay) {
+  clearTimeout(liveLogTimer);
+  liveLogTimer=setTimeout(()=>{
+    streamNextLog();
+    if(liveLogIndex<ALL_LOGS.length&&playing) scheduleLiveLog(60+Math.random()*80);
+  },delay);
+}
+
+/* ═══════════════════════════════════════
+   PLAYBACK
+═══════════════════════════════════════ */
+function startJourney() {
+  if(started) return;
+  started=true; playing=true; updatePlayIcon();
+  goToStep(0); scheduleNext(); scheduleLiveLog(200);
+}
+
+function togglePlay() {
+  if(!started){startJourney();return;}
+  playing=!playing; updatePlayIcon();
+  if(playing){scheduleNext();scheduleLiveLog(80);}
+  else{clearTimeout(playTimer);clearTimeout(liveLogTimer);}
+}
+
+function updatePlayIcon() {
+  document.getElementById('play-icon').innerHTML=playing
+    ?'<rect x="3" y="2" width="3" height="10" rx="1" fill="white"/><rect x="8" y="2" width="3" height="10" rx="1" fill="white"/>'
+    :'<path d="M3 2L11 7L3 12V2Z" fill="white"/>';
+}
+
+function scheduleNext() {
+  clearTimeout(playTimer); if(!playing) return;
+  playTimer=setTimeout(()=>{
+    if(currentStep<STEPS.length-1){goToStep(currentStep+1);scheduleNext();}
+    else{playing=false;updatePlayIcon();setTimeout(showResult,800);}
+  },STEP_DURATION);
+}
+
+function jumpToStep(i) {
+  if(!started) startJourney();
+  clearTimeout(playTimer); playing=false; updatePlayIcon(); goToStep(i);
+}
+
+function goToStep(i) {
+  currentStep=i;
+  STEPS.forEach((_,idx)=>{
+    const el=document.getElementById(`step-${idx}`);
+    if(!el) return;
+    el.classList.remove('st-active','st-done');
+    if(idx<i) el.classList.add('st-done');
+    else if(idx===i) el.classList.add('st-active');
+    const ms=document.getElementById(`arch-ms-${idx}`);
+    if(ms){ms.classList.remove('running','done');if(idx<i)ms.classList.add('done');else if(idx===i)ms.classList.add('running');}
+  });
+  for(let c=0;c<STEPS.length-1;c++){
+    const fill=document.getElementById(`conn-fill-${c}`);
+    if(!fill) continue;
+    fill.style.transition=c<i?'none':'width 0.55s ease';
+    fill.style.width=c<i?'100%':'0%';
+  }
+  if(i>0){
+    const fill=document.getElementById(`conn-fill-${i-1}`);
+    const pulse=document.getElementById(`conn-pulse-${i-1}`);
+    if(fill){fill.style.transition='width 0.55s ease';fill.style.width='100%';}
+    if(pulse){
+      pulse.style.opacity='1';pulse.style.left='0%';
+      setTimeout(()=>{pulse.style.transition='left 0.5s ease,opacity 0.1s';pulse.style.left='calc(100% - 4px)';setTimeout(()=>{pulse.style.opacity='0';},500);},50);
+    }
+  }
+  const pct=STEPS.length>1?(i/(STEPS.length-1))*100:0;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('play-step-label').textContent=`Etapa ${i+1} de ${STEPS.length}`;
+  updateFocusCard(i);
+  if(currentMode==='tech') selectTechNode(i);
+}
+
+function updateFocusCard(i) {
+  const s=STEPS[i], card=document.getElementById('focus-card');
+  document.getElementById('fc-icon').textContent=s.icon;
+  document.getElementById('fc-icon').style.background=s.color+'22';
+  document.getElementById('fc-step-label').textContent=`Etapa ${i+1} de ${STEPS.length}`;
+  document.getElementById('fc-title').textContent=s.title;
+  let d=s.detail;
+  if(s.chat) d+=`<div class="chat-bubble"><span class="avatar">✨</span><span>${s.chat}</span></div>`;
+  document.getElementById('fc-desc').innerHTML=d;
+  document.getElementById('fc-pills').innerHTML=s.pills.map(p=>{
+    const dot=p.c==='highlight'?'var(--ok)':p.c==='ai'?'var(--ai)':p.c==='cf'?'var(--cf)':p.c==='warn'?'var(--sec)':p.c==='pix'?'var(--pix)':'var(--dim)';
+    return `<span class="fc-pill ${p.c}"><span style="width:5px;height:5px;border-radius:50%;background:${dot};display:inline-block"></span>${p.l}</span>`;
+  }).join('');
+  const last=i===STEPS.length-1;
+  document.getElementById('fc-status').className=`fc-status ${last?'status-done':'status-active'}`;
+  document.getElementById('fc-status-text').textContent=last?'Concluído':'Em execução';
+  const ms=STEPS.slice(0,i+1).reduce((a,s)=>a+s.time,0);
+  document.getElementById('fc-time').textContent=ms>0?`+${ms}ms`:'<1ms';
+  card.style.borderColor=s.color+'44';
+}
+
+function seekProgress(e) {
+  if(!started) return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  jumpToStep(Math.max(0,Math.min(STEPS.length-1,Math.round(pct*(STEPS.length-1)))));
+}
+
+/* ═══════════════════════════════════════
+   RESULT CARD
+═══════════════════════════════════════ */
+function showResult() {
+  // glow all connectors green
+  for(let c=0;c<STEPS.length-1;c++){
+    const f=document.getElementById(`conn-fill-${c}`);
+    if(f) f.style.background='linear-gradient(90deg,rgba(74,222,128,0.48),rgba(34,211,238,0.42))';
+  }
+  document.getElementById('steps-row').classList.add('steps-all-done');
+  STEPS.forEach((_,i)=>{
+    const ms=document.getElementById(`arch-ms-${i}`);
+    if(ms){ms.classList.remove('running');ms.classList.add('done');}
+  });
+
+  // populate card with journey result data
+  const r=journey.rc;
+  document.getElementById('rc-badge-txt').textContent=r.badge;
+  document.getElementById('rc-amount').textContent=r.amount;
+  document.getElementById('rc-dest').textContent=r.dest;
+  document.getElementById('rc-time').textContent=r.time;
+  document.getElementById('rc-layers').textContent=r.layers;
+  document.getElementById('rc-label3').textContent=r.label3;
+  document.getElementById('rc-val3').textContent=r.val3;
+  document.getElementById('rc-trace').textContent=r.trace;
+  document.getElementById('rc-dl-btn').textContent=r.dl;
+
+  // show card (non-blocking — pointer-events only on card)
+  document.getElementById('result-card').classList.add('visible');
+}
+
+function closeResultCard() {
+  document.getElementById('result-card').classList.remove('visible');
+}
+
+function exploreExecution() {
+  closeResultCard();
+  setMode('tech');
+  selectTechNode(STEPS.length-1);
+}
+
+function reviewJourney() {
+  closeResultCard();
+  if(currentMode!=='exec') setMode('exec');
+}
+
+function receiptAction() {
+  const dl=journey.rc.dl;
+  if(dl==='Baixar comprovante') showToast('Comprovante gerado');
+  else showToast('Resumo copiado');
+}
+
+function novaTransacao() {
+  // Full clean reset, return to selector
+  resetRuntimeState();
+  // clear journey reference
+  journey=null; STEPS=[]; ALL_LOGS=[];
+  document.getElementById('steps-row').innerHTML='';
+  document.getElementById('tech-arch').innerHTML='<div class="arch-heading">Arquitetura de Execução</div>';
+  document.getElementById('playbar').classList.add('hidden');
+  document.getElementById('live-counter').style.display='none';
+  if(currentMode!=='exec') setMode('exec');
+  document.getElementById('journey-selector').classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════
+   MODE SWITCH
+═══════════════════════════════════════ */
+function setMode(mode) {
+  currentMode=mode;
+  const te=document.getElementById('tech-mode');
+  const be=document.getElementById('btn-exec-mode'),bt=document.getElementById('btn-tech-mode');
+  if(mode==='tech'){te.classList.add('visible');bt.classList.add('active');be.classList.remove('active');if(currentStep>=0&&STEPS.length>0)selectTechNode(currentStep);}
+  else{te.classList.remove('visible');be.classList.add('active');bt.classList.remove('active');}
+}
+
+/* ═══════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════ */
+function colorize(s){
+  return s
+    .replace(/("[\w@.\-: /]+")\s*:/g,'<span class="jk">$1</span>:')
+    .replace(/:\s*"([^"]*)"/g,(_,v)=>`: <span class="js">"${v}"</span>`)
+    .replace(/:\s*(\d+\.?\d*)/g,(_,v)=>`: <span class="jn">${v}</span>`)
+    .replace(/:\s*(true|false)/g,(_,v)=>`: <span class="jb">${v}</span>`);
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+document.addEventListener('keydown',e=>{
+  const rc=document.getElementById('result-card');
+  if(e.code==='Escape'){
+    if(rc.classList.contains('visible')){closeResultCard();return;}
+    if(currentMode==='tech'){setMode('exec');return;}
+    if(started) goToSelector();
+  }
+  if(!started) return;
+  if(e.code==='Space'){e.preventDefault();togglePlay();}
+  if(e.code==='ArrowRight'&&currentStep<STEPS.length-1) jumpToStep(currentStep+1);
+  if(e.code==='ArrowLeft'&&currentStep>0) jumpToStep(currentStep-1);
+});
+</script>
+</body>
+</html>
