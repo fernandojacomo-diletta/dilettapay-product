@@ -199,7 +199,19 @@ body {
 .card.dep-by {
   border-color: var(--blue2) !important;
   box-shadow: 0 0 0 1px var(--blue2), 0 0 8px rgba(78,155,255,0.2) !important;
+  opacity: .50;
 }
+.card.dep-by .card-name,
+.card.dep-by .card-desc,
+.card.dep-by .card-meta,
+.card.dep-by .badge,
+.card.dep-by .card-warning { color: rgba(140,155,180,0.7) !important; }
+
+.card.dep-nice .card-name,
+.card.dep-nice .card-desc,
+.card.dep-nice .card-meta,
+.card.dep-nice .badge,
+.card.dep-nice .card-warning { color: rgba(140,155,180,0.75) !important; }
 .card.dimmed { opacity: .22 !important; filter: saturate(0.25); }
 .card.backlog-card.dimmed { opacity: .18 !important; border-style: dashed; }
 .card.ia-pure.dimmed { opacity: .18 !important; }
@@ -387,9 +399,9 @@ body {
   padding: 1px 5px; font-size: 9px;
 }
 
-.card.dep-nice{border-style:dashed!important;border-color:var(--orange)!important;box-shadow:0 0 8px rgba(249,115,22,.15)!important;}
+.card.dep-nice{border-style:dashed!important;border-color:#16a34a!important;box-shadow:0 0 6px rgba(22,163,74,.12)!important;opacity:.75;}
 .card.dep-future{border-style:dashed!important;border-color:#1e40af!important;box-shadow:0 0 8px rgba(30,64,175,.2)!important;}
-.card.dep-nice.backlog-card,.card.dep-future.backlog-card{opacity:.9;}
+.card.dep-nice.backlog-card{opacity:.75;}.card.dep-future.backlog-card{opacity:.9;}
 .cf-mcp-line{width:2px;height:18px;background:linear-gradient(to bottom,var(--purple2),transparent);border-radius:1px;margin:2px 0 0 14px;}
 .cf-mcp-top{display:flex;align-items:center;gap:5px;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid rgba(168,85,247,.2);}
 .cf-mcp-top-line{width:2px;height:14px;background:linear-gradient(to top,var(--purple2),transparent);border-radius:1px;flex-shrink:0;}
@@ -646,9 +658,6 @@ body {
     <button onclick="clearSearch()" style="background:var(--border);border:none;color:var(--text3);font-family:inherit;font-size:10px;padding:4px 7px;border-radius:4px;cursor:pointer;">✕</button>
   </div>
 
-  <a href="status_report.html" target="_blank" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#dc2626;color:#fff;text-decoration:none;font-family:inherit;font-size:10px;font-weight:700;padding:5px 10px;border-radius:5px;letter-spacing:.03em;white-space:nowrap;transition:background .15s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
-    ⚠ Checar Status atual do projeto
-  </a>
   <div class="header-legend">
     <div class="leg-item"><div class="leg-dot" style="background:var(--ia-color)"></div>IA Pura</div>
     <div class="leg-item"><div class="leg-dot" style="background:var(--plus-color)"></div>Pot. IA</div>
@@ -688,7 +697,7 @@ body {
     Depende de…
   </div>
   <div class="dep-bar-item">
-    <div class="dep-bar-box" style="background:rgba(249,115,22,0.06);border-color:var(--orange);border-style:dashed"></div>
+    <div class="dep-bar-box" style="background:rgba(22,163,74,0.08);border-color:#16a34a;border-style:dashed"></div>
     Nice to Have
   </div>
   <div class="dep-bar-item">
@@ -1049,9 +1058,9 @@ const CARDS = [
     iaSug:"Avatar/assistente com PIX assistido, logs visuais e contexto controlado.",
     desc:"Assistente IA/avatar conversacional para correntistas. Vitrine Febraban Tech.",
     valD:"Atrai CEO/CIO/CMO e demonstra competência IA.", valC:"Interação conversacional diferenciada.",
-    deps:["C04","C18","C08","C14","C19","C26","C28","C07","C30","C17","C42","C20","C33"],
+    deps:["C04","C18","C08","C14","C19","C26","C28","C07","C30","C17","C42","C20","C33","C29"],
     aviso:"Depende de desacoplamento do backend (em construção)", group:"iasolucoes",
-    liaDetail: true, liaNice:["C19","C26","C28","C07","C30","C20","C17"], liaFuture:[], liaExclude:["C29","C35","BL01","BL02","BL04"]  },
+    liaDetail: true, liaNice:["C19","C26","C28","C07","C30","C20","C17"], liaFuture:[], liaExclude:["C35","BL01","BL02","BL04"]  },
 
   { id:"C31", name:"AI Layer Essencial", cat:"IA", origem:"CoreFlow", canais:["Todos"],
     status:"discussao", ia:"ia-pure",
@@ -1601,7 +1610,7 @@ function renderLiaPanel(card) {
       <div class="dep-list">
         ${(card.liaNice||[]).map(id=>{
           const c=byId[id];if(!c)return "";
-          return `<div class="dep-item" style="border-left:2px dashed var(--orange)" onclick="selectCard('${c.id}')"><span class="dep-arr">→</span><span class="dep-id">${c.id}</span><span>${c.name}</span></div>`;
+          return `<div class="dep-item" style="border-left:2px dashed #16a34a" onclick="selectCard('${c.id}')"><span class="dep-arr">→</span><span class="dep-id">${c.id}</span><span>${c.name}</span></div>`;
         }).join("")}
       </div>
     </div>
